@@ -31,7 +31,7 @@ jobs:
           name: "Nix Build"
           command: |
             # Required to upload artifacts
-            nix-env -i cacert
+            nix-env -i nss-cacert
             nix-build
 
       - store_artifacts:
