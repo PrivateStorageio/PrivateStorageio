@@ -22,6 +22,7 @@ jobs:
       - run:
           name: "Install Git"
           command: |
+            # Required for the checkout step
             nix-env -i git openssh
 
       - "checkout"
@@ -29,6 +30,8 @@ jobs:
       - run:
           name: "Nix Build"
           command: |
+            # Required to upload artifacts
+            nix-env -i cacert
             nix-build
 
       - store_artifacts:
