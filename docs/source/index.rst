@@ -10,7 +10,7 @@ Welcome to PrivateStorageio's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   architecture-overview
 
 Indices and tables
 ==================

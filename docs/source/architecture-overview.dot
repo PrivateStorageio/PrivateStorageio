@@ -1,0 +1,50 @@
+digraph subscriptions {
+        rankdir=LR
+
+        subgraph cluster_usercontrolled {
+                label = "User Operated"
+                rankdir=LR
+                GridSync                 [label="GridSync",                          shape=circle]
+                Browser                  [label="Browser",                           shape=circle]
+                TahoeLAFS                [label="Tahoe-LAFS",                        shape=circle]
+        }
+
+
+        subgraph cluster_pscontrolled {
+                label = "PrivateStorage.io Operated"
+                rankdir = TB
+                PSWebServer              [label="PrivateStorage.io Web Server",      shape=box]
+                SubscriptionConfigWHPeer [label="Subscription Config Wormhole Peer", shape=box]
+                PaymentServer            [label="Payment Server",                    shape=box]
+                SATIssuer                [label="SAT Issuer",                        shape=box]
+                PSStorageGrid            [label="PrivateStorage.io Storage Grid",    shape=box]
+        }
+
+        User                     [label="User",                              shape=egg]
+        Stripe                   [label="Stripe",                            shape=pentagon]
+
+        User                     -> PSWebServer              [label="1. Get wormhole code",    fontcolor=red, color=red]
+        PSWebServer              -> User                     [label="2. 7-petulant-banana",    fontcolor=blue, color=blue]
+        User                     -> GridSync                 [label="3. 7-petulant-banana",    fontcolor=brown, color=brown]
+        GridSync                 -> SubscriptionConfigWHPeer [label="4. Get configuration",    fontcolor=black, color=black]
+        SubscriptionConfigWHPeer -> GridSync                 [label="5. Grid configuration",   fontcolor=magenta, color=magenta]
+        GridSync                 -> TahoeLAFS                [label="6. Instantiate",          fontcolor=aquamarine3, color=aquamarine3]
+        GridSync                 -> TahoeLAFS                [label="7. Redeem PRN",           fontcolor=crimson, color=crimson]
+        TahoeLAFS                -> PaymentServer            [label="8. Redeem PRN",           fontcolor=crimson, color=crimson]
+        PaymentServer            -> TahoeLAFS                [label="9. Payment required",     fontcolor=gold3, color=gold3]
+        TahoeLAFS                -> GridSync                 [label="10. Payment required",    fontcolor=gold3, color=gold3]
+        GridSync                 -> Browser                  [label="11. Open payment window", fontcolor=gold3, color=gold3]
+        User                     -> Browser                  [label="12. Enter payment info",  fontcolor=blue, color=blue]
+        Browser                  -> Stripe                   [label="13. Submit payment form", fontcolor=brown, color=brown]
+        Stripe                   -> Browser                  [label="14. Payment ok",          fontcolor=black, color=black]
+        Stripe                   -> PaymentServer            [label="15. Payment notification", fontcolor=magenta, color=magenta]
+        GridSync                 -> TahoeLAFS                [label="16. Redeem PRN",             fontcolor=aquamarine3, color=aquamarine3]
+        TahoeLAFS                -> TahoeLAFS                [label="17. Generate blinded tokens",        fontcolor=crimson, color=crimson]
+        TahoeLAFS                -> SATIssuer                [label="18. Redeem PRN, blinded-tokens=xs",  fontcolor=crimson, color=crimson]
+	SATIssuer                -> PaymentServer            [label="19. Check PRN",                      fontcolor=gold3, color=gold3]
+	PaymentServer            -> SATIssuer                [label="20. PRN Valid",                      fontcolor=gold3, color=gold3]
+	SATIssuer                -> TahoeLAFS                [label="21. PRN valid, signed-tokens=ys",    fontcolor=crimson, color=crimson]
+        TahoeLAFS                -> TahoeLAFS                [label="22. Store signed tokens",            fontcolor=crimson, color=crimson]
+        TahoeLAFS                -> GridSync                 [label="23. PRN Redeemed",                   fontcolor=red, color=red]
+        TahoeLAFS                -> PSStorageGrid            [label="24. Use storage, passes=y",          fontcolor=magenta, color=magenta]
+}

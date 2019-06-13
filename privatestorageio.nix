@@ -1,9 +1,19 @@
-{ stdenv, python3Packages }:
+{ stdenv, graphviz, python3Packages }:
 stdenv.mkDerivation rec {
   version = "0.0";
   name = "privatestorageio-${version}";
   src = ./.;
+
   depsBuildBuild = [
-    python3Packages.sphinx
+    graphviz
   ];
+
+  buildPhase = ''
+  ${python3Packages.sphinx}/bin/sphinx-build -W docs/source docs/build
+  '';
+
+  installPhase = ''
+  mkdir $out
+  mv docs/build $out/docs
+  '';
 }
