@@ -19,6 +19,11 @@ jobs:
     docker:
       - image: "nixos/nix:2.2.1"
     steps:
+      - run:
+          name: "Install Git"
+          command: |
+            nix-env -i git
+
       - "checkout"
 
       - run:
