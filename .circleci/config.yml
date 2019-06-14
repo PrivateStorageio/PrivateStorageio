@@ -25,6 +25,10 @@ jobs:
             # Required for the checkout step
             nix-env -i git openssh
 
+      - restore_cache:
+          keys:
+            - "v1-nix-store"
+
       - "checkout"
 
       - run:
@@ -36,6 +40,11 @@ jobs:
             # doesn't know how to use the nix ca bundle we could install.
             apk update
             apk add ca-certificates
+
+      - save_cache:
+          key: "v1-nix-store"
+          paths:
+            - "/nix/store"
 
       - store_artifacts:
           path: "result/docs"
