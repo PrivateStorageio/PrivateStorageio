@@ -30,9 +30,12 @@ jobs:
       - run:
           name: "Nix Build"
           command: |
-            # Required to upload artifacts
-            nix-env -i nss-cacert
             nix-build
+            # Required to upload artifacts.  Though we use a nix image, it's
+            # actually an alpine base...  The CircleCI artifact uploader
+            # doesn't know how to use the nix ca bundle we could install.
+            apk update
+            apk add ca-certificates
 
       - store_artifacts:
           path: "result/docs"
