@@ -20,6 +20,16 @@ jobs:
       - image: "nixos/nix:2.2.1"
     steps:
       - run:
+          name: "Install CA Certificates"
+          command: |
+            # Required for cache and artifact interactions.  Though we use a
+            # nix image, it's actually an alpine base...  The CircleCI cache
+            # management and artifact uploader doesn't know how to use the nix
+            # ca bundle we could install.
+            apk update
+            apk add ca-certificates
+
+      - run:
           name: "Install Git"
           command: |
             # Required for the checkout step
@@ -35,11 +45,6 @@ jobs:
           name: "Nix Build"
           command: |
             nix-build
-            # Required to upload artifacts.  Though we use a nix image, it's
-            # actually an alpine base...  The CircleCI artifact uploader
-            # doesn't know how to use the nix ca bundle we could install.
-            apk update
-            apk add ca-certificates
 
       - save_cache:
           key: "v1-nix-store"
