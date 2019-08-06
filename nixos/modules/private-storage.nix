@@ -42,7 +42,11 @@ in
         { nickname = "alpha";
         };
         storage =
-        { enable = true;
+        { enabled = true;
+          plugins = "privatestorageio-zkapauthz-v1";
+        };
+        "storageserver.plugins.privatestorageio-zkapauthz-v1" =
+        {
         };
       };
     };
