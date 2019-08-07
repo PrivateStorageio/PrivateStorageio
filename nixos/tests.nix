@@ -2,6 +2,9 @@
 let
   pkgs = import <nixpkgs> { };
 
+  # Total the numbers in a list.
+  sum = builtins.foldl' (a: b: a + b) 0;
+
   # A helper for loading tests.
   loadTest = moduleUnderTest: testModule:
     (import testModule (pkgs.callPackage moduleUnderTest { }));
@@ -12,11 +15,17 @@ let
   [ (loadTest ./lib/ini.nix ./lib/tests/test_ini.nix)
   ];
 
+  # Count up the tests we're going to run.
+  numTests = sum (map (s: builtins.length (builtins.attrNames s)) testModules);
+
+  # Convert it into a string for interpolation into the shell script.
+  numTestsStr = builtins.toString numTests;
+
   # Run the tests and collect the failures.
   failures = map pkgs.lib.runTests testModules;
 
   # Count the number of failures in each module.
-  numFailures = builtins.foldl' (a: b: a + b) 0 (map builtins.length failures);
+  numFailures = sum (map builtins.length failures);
 
   # Convert the total into a string for easy interpolation into the shell script.
   numFailuresStr = builtins.toString (numFailures);
@@ -30,6 +39,6 @@ if [ ${numFailuresStr} -gt 0 ]; then
   echo '${failuresStr}'
   exit 1
 else
-  echo 'OK' > $out
+  echo '${numTestsStr} tests OK' > $out
 fi
 ''
