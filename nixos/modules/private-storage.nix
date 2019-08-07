@@ -41,7 +41,7 @@ in
       { node =
         # XXX Should try to name that is unique across the grid.
         { nickname = "storage";
-          web.port = "tcp:3456:interface=127.0.0.1";
+          "web.port" = "tcp:3456:interface=127.0.0.1";
         };
         storage =
         { enabled = true;
