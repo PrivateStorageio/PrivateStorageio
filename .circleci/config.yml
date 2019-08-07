@@ -30,7 +30,7 @@ jobs:
       - run:
           name: "Run Tests"
           command: |
-            nix-build nixos/tests.nix && cat result
+            nix-build nixos/unit-tests.nix && cat result
 
   build:
     docker:

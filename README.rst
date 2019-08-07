@@ -13,7 +13,7 @@ Documentation
 
 The documentation can be built using this command::
 
-  nix-build docs.nix
+  $ nix-build docs.nix
 
 The documentation is also built on and published by CI.
 
@@ -33,3 +33,5 @@ The system tests are run using this command::
   $ nix-build nixos/system-tests.nix
 
 The system tests boot QEMU VMs which prevents them from running on CI at this time.
+
+.. _Nix: https://nixos.org/nix
