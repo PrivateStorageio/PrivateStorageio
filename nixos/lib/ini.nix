@@ -1,3 +1,5 @@
+# Functionality related to writing out ini syntax files (like Tahoe-LAFS'
+# tahoe.cfg).
 { pkgs ? import <nixpkgs> { } }:
 let lib = pkgs.lib;
 in rec {
