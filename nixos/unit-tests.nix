@@ -1,4 +1,4 @@
-# The overall test suite for PrivateStorageio NixOS configuration.
+# The overall unit test suite for PrivateStorageio NixOS configuration.
 let
   pkgs = import <nixpkgs> { };
 
