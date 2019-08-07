@@ -35,21 +35,12 @@ jobs:
             # Required for the checkout step
             nix-env -i git openssh
 
-      - restore_cache:
-          keys:
-            - "v1-nix-store"
-
       - "checkout"
 
       - run:
           name: "Nix Build"
           command: |
             nix-build -vvvvv
-
-      - save_cache:
-          key: "v1-nix-store"
-          paths:
-            - "/nix/store"
 
       - store_artifacts:
           path: "result/docs"
