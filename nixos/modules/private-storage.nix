@@ -35,11 +35,13 @@ in
     };
   };
   config = lib.mkIf cfg.enable
-  { services.tahoe.nodes."alpha" =
+  { services.tahoe.nodes."storage" =
     { package = config.services.private-storage.tahoe.package;
       sections =
       { node =
-        { nickname = "alpha";
+        # XXX Should try to name that is unique across the grid.
+        { nickname = "storage";
+          web.port = "tcp:3456:interface=127.0.0.1";
         };
         storage =
         { enabled = true;
