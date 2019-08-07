@@ -56,4 +56,9 @@ ini:
   { expected = "x = 12345\n";
     expr = ini.oneConfigItemText "x" 12345;
   };
+
+  test_dotted_key =
+  { expected = "x.y = z\n";
+    expr = ini.oneConfigItemText "x.y" "z";
+  };
 }
