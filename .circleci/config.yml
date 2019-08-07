@@ -57,7 +57,7 @@ jobs:
       - run:
           name: "Nix Build"
           command: |
-            nix-build
+            nix-build docs.nix
 
       - store_artifacts:
           path: "result/docs"
