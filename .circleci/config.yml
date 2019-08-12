@@ -15,6 +15,23 @@
 version: 2
 
 jobs:
+  test:
+    docker:
+      - image: "nixos/nix:2.2.1"
+    steps:
+      - run:
+          name: "Install Git"
+          command: |
+            # Required for the checkout step
+            nix-env -i git openssh
+
+      - "checkout"
+
+      - run:
+          name: "Run Tests"
+          command: |
+            nix-build nixos/unit-tests.nix && cat result
+
   build:
     docker:
       - image: "nixos/nix:2.2.1"
@@ -24,8 +41,8 @@ jobs:
           command: |
             # Required for cache and artifact interactions.  Though we use a
             # nix image, it's actually an alpine base...  The CircleCI cache
-            # management and artifact uploader doesn't know how to use the nix
-            # ca bundle we could install.
+            # management (which we stopped using) and artifact uploader don't
+            # know how to use the nix ca bundle we could install.
             apk update
             apk add ca-certificates
 
@@ -35,21 +52,12 @@ jobs:
             # Required for the checkout step
             nix-env -i git openssh
 
-      - restore_cache:
-          keys:
-            - "v1-nix-store"
-
       - "checkout"
 
       - run:
           name: "Nix Build"
           command: |
-            nix-build
-
-      - save_cache:
-          key: "v1-nix-store"
-          paths:
-            - "/nix/store"
+            nix-build docs.nix
 
       - store_artifacts:
           path: "result/docs"
@@ -59,4 +67,5 @@ workflows:
   version: 2
   everything:
     jobs:
+      - "test"
       - "build"
