@@ -33,20 +33,20 @@ in
         The package to use for the Tahoe-LAFS daemon.
       '';
     };
-    services.private-storage.tahoe.node."tub.port" = lib.mkOption
-    { default = "disabled";
+    services.private-storage.publicIPv4 = lib.mkOption
+    { default = "127.0.0.1";
       type = lib.types.str;
-      example = lib.literalExample "tcp:8098";
+      example = lib.literalExample "192.0.2.0";
       description = ''
-        A value for the [node]tub.port in tahoe.cfg.
+        An IPv4 address to advertise for this storage service.
       '';
     };
-    services.private-storage.tahoe.node."tub.location" = lib.mkOption
-    { default = "disabled";
-      type = lib.types.str;
-      example = lib.literalExample "tcp:192.0.2.0:8098";
+    services.private-storage.publicStoragePort = lib.mkOption
+    { default = 8898;
+      type = lib.types.int;
+      example = lib.literalExample 8098;
       description = ''
-        A value for the [node]tub.location in tahoe.cfg.
+        The port number on which to service storage clients.
       '';
     };
   };
@@ -58,8 +58,8 @@ in
         # XXX Should try to name that is unique across the grid.
         { nickname = "storage";
           "web.port" = "tcp:3456:interface=127.0.0.1";
-          "tub.port" = cfg.tahoe.node."tub.port";
-          "tub.location" = cfg.tahoe.node."tub.location";
+          "tub.port" = "tcp:${toString cfg.publicStoragePort}";
+          "tub.location" = "tcp:${cfg.publicIPv4}:${toString cfg.publicStoragePort}";
         };
         storage =
         { enabled = true;
@@ -70,5 +70,7 @@ in
         };
       };
     };
+    networking.firewall.allowedTCPPorts = [ cfg.publicStoragePort ];
+
   };
 }

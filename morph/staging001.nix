@@ -1,11 +1,7 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+{ publicIPv4, publicStoragePort }:
 
 { config, pkgs, ... }:
-
-{
-  imports =
+{ imports =
     [ # Include the results of the hardware scan.
       ./staging001-hardware.nix
     ];
@@ -27,7 +23,7 @@
   # Provide the static network configuration.
   networking.interfaces = {
     enp2s0f0.ipv4.addresses = [
-      { address = "209.95.51.251"; prefixLength = 24; }
+      { address = publicIPv4; prefixLength = 24; }
     ];
   };
   networking.defaultGateway = {
