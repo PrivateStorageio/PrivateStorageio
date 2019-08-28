@@ -33,6 +33,14 @@ in
         The package to use for the Tahoe-LAFS daemon.
       '';
     };
+    services.private-storage.tahoe.node."tub.port" = lib.mkOption
+    { default = "disabled";
+      type = lib.types.str;
+      example = lib.literalExample "tcp:8098";
+      description = ''
+        A value for the [node]tub.port in tahoe.cfg.
+      '';
+    };
     services.private-storage.tahoe.node."tub.location" = lib.mkOption
     { default = "disabled";
       type = lib.types.str;
@@ -50,6 +58,7 @@ in
         # XXX Should try to name that is unique across the grid.
         { nickname = "storage";
           "web.port" = "tcp:3456:interface=127.0.0.1";
+          "tub.port" = cfg.tahoe.node."tub.port";
           "tub.location" = cfg.tahoe.node."tub.location";
         };
         storage =
