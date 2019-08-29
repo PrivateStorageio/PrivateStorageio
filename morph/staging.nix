@@ -24,4 +24,6 @@ in
     publicIPv4 = "209.95.51.251";
     inherit publicStoragePort;
   };
+
+  "staging002" = import ./staging002.nix;
 }
