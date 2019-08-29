@@ -50,10 +50,13 @@ in {
   };
 
   config =
-  { boot.loader.timeout = 1;
-    boot.loader.grub.enable = true;
+  { boot.loader.grub.enable = true;
     boot.loader.grub.version = 2;
     boot.loader.grub.device = "/dev/disk/by-id/${cfg.grubDeviceID}";
+
+    # Get a slightly faster boot time than default.  Maybe this could even be
+    # 0 but I'm not sure.
+    boot.loader.timeout = 1;
 
     # Let me in to do subsequent configuration.
     networking.firewall.enable = false;
