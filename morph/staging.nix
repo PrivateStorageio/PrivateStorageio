@@ -7,7 +7,7 @@ let
     url = "https://github.com/NixOS/nixpkgs/archive/3c83ad6ac13b67101cc3e2e07781963a010c1624.tar.gz";
     sha256 = "0cdq342wrkvkyccygpp1gvwp7hhqg68hljjwld4vjixm901ayy14";
   }) {};
-  publicStoragePort = 8898;
+  cfg = pkgs.lib.trivial.importJSON ./grid.config.json;
 in
 {
   network =  {
@@ -17,12 +17,12 @@ in
 
   "staging000" = import ./staging000.nix {
     publicIPv4 = "3.123.26.90";
-    inherit publicStoragePort;
+    inherit (cfg) publicStoragePort;
   };
 
   "staging001" = import ./staging001.nix {
     publicIPv4 = "209.95.51.251";
-    inherit publicStoragePort;
+    inherit (cfg) publicStoragePort;
   };
 
   "staging002" = import ./staging002.nix;
