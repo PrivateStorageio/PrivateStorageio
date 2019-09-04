@@ -8,16 +8,35 @@ let
     url = "https://github.com/NixOS/nixpkgs/archive/3c83ad6ac13b67101cc3e2e07781963a010c1624.tar.gz";
     sha256 = "0cdq342wrkvkyccygpp1gvwp7hhqg68hljjwld4vjixm901ayy14";
   }) {};
+  # Load our JSON configuration for later use.
   cfg = pkgs.lib.trivial.importJSON ./grid.config.json;
 in
 {
   network =  {
+    # Make all of the hosts in this network use the nixpkgs we pinned above.
     inherit pkgs;
+    # This is just for human consumption as far as I can tell.
     description = "PrivateStorage.io Staging Grid";
   };
 
+  # Here are the hosts that are in this morph network.  This is sort of like a
+  # server manifest.  We try to keep as many of the specific details as
+  # possible out of *this* file so that this file only grows as server count
+  # grows.  If it grows too much, we can load servers by listing contents of a
+  # directory or reading from another JSON file or some such.  For now, I'm
+  # just manually maintaining these entries.
+  #
+  # The name on the left of the `=` is mostly irrelevant but it does provide a
+  # default hostname for the server if the configuration on the right side
+  # doesn't specify one.
+  #
+  # The names must be unique!
+
   "staging000" = import ./staging000.nix {
     publicIPv4 = "3.123.26.90";
+    # Pass along some of the Tahoe-LAFS configuration.  If we have much more
+    # configuration than this we may want to keep it bundled up in one value
+    # instead of pulling individual values out to pass along.
     inherit (cfg) publicStoragePort;
   };
 
