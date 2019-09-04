@@ -16,8 +16,7 @@ grid.nix
 --------
 
 This is the `morph`_ entrypoint for the grid.
-This defines the "network" (which is not really related to any IP networking configuration).
-It also defines all of the servers that are part of the grid.
+This defines all of the servers that are part of the grid.
 
 The actual configuration is split into separate files that are imported from this one.
 You can do things like build the network::
