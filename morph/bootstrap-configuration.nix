@@ -10,9 +10,13 @@
 #  2. Overwrite /etc/nixos/configuration.nix on Debian machine that has had
 #     NixOS installed on top of it.
 #
-#  3. Finish the NixOS install.
+#  3. Copy the generated /etc/nixos/hardware-configuration.nix from the Debian
+#     machine and add it to this repository.  We need it to build the system
+#     later.
 #
-#  4. Replace this configuration on the new NixOS system using morph.
+#  4. Finish the NixOS install and reboot into a pristine NixOS system.
+#
+#  5. Specify the real configuration for this system and deploy it with morph.
 #
 let
   # Make all these correct.  Some default values from a random system left in
