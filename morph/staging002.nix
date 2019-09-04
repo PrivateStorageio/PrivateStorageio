@@ -1,12 +1,18 @@
-{ config, pkgs, ... }:
-{ imports =
+{ ... }:
+{
+  imports =
     [ # Include the results of the hardware scan.
       ./staging002-hardware.nix
       # Configure it as a system operated by 100TB.
-      # Instance details are read from <hostName>.config.json
       ../nixos/modules/100tb.nix
     ];
 
+  # Pass the configuration specific to this host to the 100TB module to be
+  # expanded into a complete system configuration.  See the 100tb module for
+  # handling of this value.
+  #
+  # The module name is quoted because `1` makes `100tb` look an awful lot like
+  # it should be a number.
   "100tb".config = import ./staging002-config.nix;
 
   # This value determines the NixOS release with which your system is to be
