@@ -45,5 +45,7 @@ in
     inherit (cfg) publicStoragePort;
   };
 
-  "staging002" = import ./staging002.nix;
+  # Pass the whole grid configuration to the module and let it take what it
+  # wants.
+  "staging002" = import ./staging002.nix cfg;
 }

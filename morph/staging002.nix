@@ -1,7 +1,7 @@
-{ ... }:
 let
   cfg = import ./staging002-config.nix;
 in
+{ publicStoragePort, ... }:
 {
   imports =
     [ # Include the results of the hardware scan.
