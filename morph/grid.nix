@@ -32,7 +32,7 @@ in
   #
   # The names must be unique!
 
-  "staging000" = import ./staging000.nix {
+  "testing000" = import ./testing000.nix {
     publicIPv4 = "3.123.26.90";
     # Pass along some of the Tahoe-LAFS configuration.  If we have much more
     # configuration than this we may want to keep it bundled up in one value

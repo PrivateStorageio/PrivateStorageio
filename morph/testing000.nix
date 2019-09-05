@@ -1,6 +1,6 @@
 { publicIPv4, publicStoragePort }:
 { imports = [
-    ./staging000-hardware.nix
+    ./testing000-hardware.nix
     ../nixos/modules/private-storage.nix
   ];
 
