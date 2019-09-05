@@ -12,6 +12,7 @@ Welcome to PrivateStorageio's documentation!
 
    README
    architecture-overview
+   morph
 
 
 
