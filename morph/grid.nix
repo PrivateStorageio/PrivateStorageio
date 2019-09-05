@@ -19,6 +19,6 @@ import ./make-grid.nix {
 
     # Pass the whole grid configuration to the module and let it take what it
     # wants.
-    "staging002" = import ./staging002.nix cfg;
+    "storage000" = import ./storage000.nix cfg;
   };
 }

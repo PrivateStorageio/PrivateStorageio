@@ -1,11 +1,11 @@
 let
-  cfg = import ./staging002-config.nix;
+  cfg = import ./storage000-config.nix;
 in
 { publicStoragePort, ... }:
 {
   imports =
     [ # Include the results of the hardware scan.
-      ./staging002-hardware.nix
+      ./storage000-hardware.nix
       # Configure it as a system operated by 100TB.
       ../nixos/modules/100tb.nix
       # Bring in our module for configuring the Tahoe-LAFS service and other
