@@ -1,4 +1,7 @@
 { ... }:
+let
+  cfg = import ./staging002-config.nix;
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -13,7 +16,7 @@
   #
   # The module name is quoted because `1` makes `100tb` look an awful lot like
   # it should be a number.
-  "100tb".config = import ./staging002-config.nix;
+  "100tb".config = cfg;
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
