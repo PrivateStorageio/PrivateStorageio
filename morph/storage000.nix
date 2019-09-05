@@ -1,16 +1,21 @@
 let
+  # Get the configuration that's specific to this node.
   cfg = import ./storage000-config.nix;
 in
-{ publicStoragePort, ... }:
-{
-  imports =
-    [ # Include the results of the hardware scan.
-      ./storage000-hardware.nix
-      # Configure it as a system operated by 100TB.
-      ../nixos/modules/100tb.nix
-      # Bring in our module for configuring the Tahoe-LAFS service and other
-      # Private Storage-specific things.
-      ../nixos/modules/private-storage.nix
+# Define the function that defines the node.  Accept the public storage server
+# port argument so we can configure Tahoe-LAFS with it.  Accept but ignore any
+# other arguments.
+{ publicStoragePort, ... }: {
+
+  # Any extra NixOS modules to load on this server.
+  imports = [
+    # Include the results of the hardware scan.
+    ./storage000-hardware.nix
+    # Configure it as a system operated by 100TB.
+    ../nixos/modules/100tb.nix
+    # Bring in our module for configuring the Tahoe-LAFS service and other
+    # Private Storage-specific things.
+    ../nixos/modules/private-storage.nix
    ];
 
   # Pass the configuration specific to this host to the 100TB module to be
@@ -22,8 +27,9 @@ in
   "100tb".config = cfg;
 
   # Turn on the Private Storage (Tahoe-LAFS) service.
-  services.private-storage =
-  { enable = true;
+  services.private-storage = {
+    # Yep.  Turn it on.
+    enable = true;
     # Get the public IPv4 address from the node configuration.
     inherit (cfg) publicIPv4;
     # And the port to operate on is specified via parameter.
