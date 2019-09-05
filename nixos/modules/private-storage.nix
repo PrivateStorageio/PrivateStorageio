@@ -2,23 +2,26 @@
 # preferred configuration for the Private Storage grid.
 { pkgs, lib, config, ... }:
 let
+  # Derive a brand new version of pkgs which has our overlay applied.  The
+  # overlay defines a new version of Tahoe-LAFS and some of its dependencies
+  # and maybe other useful Private Storage customizations.
   pspkgs = import pkgs.path
   { overlays = [ (import ./overlays.nix) ];
   };
+  # Grab the configuration for this module for convenient access below.
   cfg = config.services.private-storage;
 in
 {
-
   # Upstream tahoe-lafs module conflicts with ours (since ours is a
-  # copy/paste/edit of upstream's...).  Disable
-  # it.
+  # copy/paste/edit of upstream's...).  Disable it.
   #
   # https://nixos.org/nixos/manual/#sec-replace-modules
   disabledModules =
   [ "services/network-filesystems/tahoe.nix"
   ];
 
-  # Load our tahoe-lafs module.
+  # Load our tahoe-lafs module.  It is configurable in the way I want it to be
+  # configurable.
   imports =
   [ ./tahoe.nix
   ];
@@ -50,26 +53,53 @@ in
       '';
     };
   };
+
+  # Define configuration based on values given for our options - starting with
+  # the option that says whether this is even turned on.
   config = lib.mkIf cfg.enable
   { services.tahoe.nodes."storage" =
     { package = config.services.private-storage.tahoe.package;
+      # Each attribute in this set corresponds to a section in the tahoe.cfg
+      # file.  Attributes on those sets correspond to individual assignments
+      # in those sections.
+      #
+      # We just populate this according to policy/preference of Private
+      # Storage.
       sections =
       { node =
         # XXX Should try to name that is unique across the grid.
         { nickname = "storage";
+          # We have the web port active because the CLI uses it.  We may
+          # eventually turn this off, or at least have it off by default (with
+          # an option to turn it on).  I don't know how much we'll use the CLI
+          # on the nodes.  Maybe very little?  Or maybe it will be part of a
+          # health check for the node...  In any case, we tell it to bind to
+          # localhost so no one *else* can use it.  And the principle of the
+          # web interface is that merely having access to it doesn't grant
+          # access to any data.  It does grant access to storage capabilities
+          # but with our plugin configuration you still need ZKAPs to use
+          # those...
           "web.port" = "tcp:3456:interface=127.0.0.1";
+          # We have to tell Tahoe-LAFS where to listen for Foolscap
+          # connections for the storage protocol.  We have to tell it twice.
+          # First, in the syntax which it uses to listen.
           "tub.port" = "tcp:${toString cfg.publicStoragePort}";
+          # Second, in the syntax it advertises to in the fURL.
           "tub.location" = "tcp:${cfg.publicIPv4}:${toString cfg.publicStoragePort}";
         };
         storage =
         { enabled = true;
+          # Turn on our plugin.
           plugins = "privatestorageio-zkapauthz-v1";
         };
+        # It doesn't have any configuration *yet*.
         "storageserver.plugins.privatestorageio-zkapauthz-v1" =
         {
         };
       };
     };
+
+    # Let traffic destined for the storage node's Foolscap server through.
     networking.firewall.allowedTCPPorts = [ cfg.publicStoragePort ];
 
   };
