@@ -16,10 +16,6 @@ import ./make-grid.nix {
     # doesn't specify one.
     #
     # The names must be unique!
-    "staging001" = import ./staging001.nix {
-      publicIPv4 = "209.95.51.251";
-      inherit (cfg) publicStoragePort;
-    };
 
     # Pass the whole grid configuration to the module and let it take what it
     # wants.
