@@ -6,7 +6,11 @@ let
   # overlay defines a new version of Tahoe-LAFS and some of its dependencies
   # and maybe other useful Private Storage customizations.
   pspkgs = import pkgs.path
-  { overlays = [ (import ./overlays.nix) ];
+  { overlays = [
+      # needs fetchFromGitHub to check out zkapauthorizer
+      (pkgs.callPackage ./zkap-overlay.nix { })
+      (import ./overlays.nix)
+    ];
   };
   # Grab the configuration for this module for convenient access below.
   cfg = config.services.private-storage;
