@@ -56,6 +56,14 @@ in
         The port number on which to service storage clients.
       '';
     };
+    services.private-storage.issuerRootURL = lib.mkOption
+    { default = "https://issuer.privatestorage.io/";
+      type = lib.types.str;
+      example = lib.literalExample "https://example.invalid/";
+      description = ''
+        The URL of the Ristretto issuer service to announce.
+      '';
+    };
   };
 
   # Define configuration based on values given for our options - starting with
@@ -96,9 +104,8 @@ in
           # Turn on our plugin.
           plugins = "privatestorageio-zkapauthz-v1";
         };
-        # It doesn't have any configuration *yet*.
         "storageserver.plugins.privatestorageio-zkapauthz-v1" =
-        {
+        { "ristretto-issuer-root-url" = cfg.issuerRootURL;
         };
       };
     };
