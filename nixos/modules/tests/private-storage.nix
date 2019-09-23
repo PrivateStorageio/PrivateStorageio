@@ -19,11 +19,11 @@ let
     let
       # makeNetwork :: Integer -> AttrSet
       makeNetwork = n: {
+        # Just need to disable the firewall so all the traffic flows freely.
+        # We could do other network configuration here too, if we wanted.
+        # Initially I thought we might need to statically asssign IPs but we
+        # can just use the node names, "introducer", etc, instead.
         networking.firewall.enable = false;
-        networking.useDHCP = false;
-        networking.interfaces.eth0.ipv4.addresses = [
-          { address = "192.168.0.${toString n}"; prefixLength = 24; }
-        ];
       };
       # addresses :: [Integer]
       addresses = pkgs.lib.range 0 (builtins.length (builtins.attrNames nodes));
