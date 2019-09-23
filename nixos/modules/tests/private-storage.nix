@@ -88,6 +88,9 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Set up a Tahoe-LAFS introducer.
       #
+      my ($code, $version) = $introducer->execute("tahoe --version");
+      $introducer->log($version);
+
       $introducer->succeed(
           'tahoe create-introducer ' .
           '--port tcp:${toString introducerPort} ' .
@@ -123,6 +126,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Get a Tahoe-LAFS storage server up.
       #
+      my ($code, $version) = $storage->execute("tahoe --version");
+      $storage->log($version);
 
       # The systemd unit should reach the running state.
       $storage->waitForUnit('tahoe.storage.service');
@@ -139,6 +144,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
+      my ($code, $version) = $client->execute("tahoe --version");
+      $client->log($version);
 
       # Create a Tahoe-LAFS client on it.
       $client->succeed(
