@@ -62,11 +62,46 @@ VzowmHAqdxYvlfJsWe91UI0=
     name = "introducer.furl";
     text = introducerFURL;
   };
+
+  # assignAddresses :: Set Name (Set -> AttrSet) -> Set Name (Set -> AttrSet)
+  assignAddresses = nodes:
+    let
+      # makeNetwork :: Integer -> AttrSet
+      makeNetwork = n: {
+        networking.firewall.enable = false;
+        networking.useDHCP = false;
+        networking.interfaces.eth0.ipv4.addresses = [
+          { address = "192.168.0.${toString n}"; prefixLength = 24; }
+        ];
+      };
+      # addresses :: [Integer]
+      addresses = pkgs.lib.range 0 (builtins.length (builtins.attrNames nodes));
+      # nodesAsList :: [(Name, (Set -> AttrSet))]
+      nodesAsList = pkgs.lib.attrsets.mapAttrsToList (name: value: [name value]) nodes;
+      # nodeAndNetworkList :: [[Name, Set -> AttrSet], Integer]
+      nodeAndNetworkList = pkgs.lib.lists.zipListsWith (fst: snd: [fst snd]) nodesAsList addresses;
+
+      # mergeNodeAndNetwork :: Integer -> Name -> (Set -> AttrSet) -> {Name, (Set -> AttrSet)}
+      mergeNodeAndNetwork = number: name: node: {
+        inherit name;
+        value = args@{ pkgs, ... }: ((node args) // (makeNetwork number));
+      };
+      at = builtins.elemAt;
+      merged = map (elem:
+        let
+          node = (at (at elem 0) 1);
+          name = (at (at elem 0) 0);
+          number = (at elem 1);
+        in
+          mergeNodeAndNetwork number name node
+      ) nodeAndNetworkList;
+    in
+      builtins.listToAttrs merged;
 in
 # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
 import <nixpkgs/nixos/tests/make-test.nix> {
 
-  nodes = rec {
+  nodes = assignAddresses rec {
     # Get a machine where we can run a Tahoe-LAFS client node.
     client =
       { config, pkgs, ... }:
