@@ -35,6 +35,8 @@ let
       # mergeNodeAndNetwork :: Integer -> Name -> (Set -> AttrSet) -> {Name, (Set -> AttrSet)}
       mergeNodeAndNetwork = number: name: node: {
         inherit name;
+        # Sadly we have to name arguments in this definition to get them
+        # automatically passed in by the various autocall helpers in Nix.
         value = args@{ pkgs, ... }: ((node args) // (makeNetwork number));
       };
       at = builtins.elemAt;
