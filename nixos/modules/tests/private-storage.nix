@@ -79,7 +79,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       };
   };
 
-  # Test the machine with a Perl program (sobbing).
+  # Test the machines with a Perl program (sobbing).
   testScript =
     ''
       # Start booting all the VMs in parallel to speed up operations down below.
