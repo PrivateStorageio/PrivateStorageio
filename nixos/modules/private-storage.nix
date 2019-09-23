@@ -48,6 +48,14 @@ in
         An IPv4 address to advertise for this storage service.
       '';
     };
+    services.private-storage.introducerFURL = lib.mkOption
+    { default = null;
+      type = lib.types.nullOr lib.types.str;
+      example = lib.literalExample "pb://<tubid>@<location hint>/<swissnum>";
+      description = ''
+        A Tahoe-LAFS introducer node fURL at which this storage node should announce itself.
+      '';
+    };
     services.private-storage.publicStoragePort = lib.mkOption
     { default = 8898;
       type = lib.types.int;
@@ -78,7 +86,10 @@ in
       # We just populate this according to policy/preference of Private
       # Storage.
       sections =
-      { node =
+      { client = if cfg.introducerFURL == null then {} else
+        { "introducer.furl" = cfg.introducerFURL;
+        };
+        node =
         # XXX Should try to name that is unique across the grid.
         { nickname = "storage";
           # We have the web port active because the CLI uses it.  We may
