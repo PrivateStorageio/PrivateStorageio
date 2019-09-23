@@ -14,8 +14,8 @@ let
     text = introducerFURL;
   };
 
-  # assignAddresses :: Set Name (Set -> AttrSet) -> Set Name (Set -> AttrSet)
-  assignAddresses = nodes:
+  # setupNetwork :: Set Name (Set -> AttrSet) -> Set Name (Set -> AttrSet)
+  setupNetwork = nodes:
     let
       # makeNetwork :: Integer -> AttrSet
       makeNetwork = n: {
@@ -54,7 +54,7 @@ in
 # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
 import <nixpkgs/nixos/tests/make-test.nix> {
 
-  nodes = assignAddresses rec {
+  nodes = setupNetwork rec {
     # Get a machine where we can run a Tahoe-LAFS client node.
     client =
       { config, pkgs, ... }:
