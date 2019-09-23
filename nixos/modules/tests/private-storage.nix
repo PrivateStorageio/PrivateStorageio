@@ -135,11 +135,37 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Set up a Tahoe-LAFS introducer.
       #
-      $introducer->succeed('tahoe create-introducer --hostname introducer /tmp/introducer');
-      $introducer->copyFileFromHost('${pemFile}', '/tmp/introducer/private/node.pem');
-      $introducer->copyFileFromHost('${introducerFURLFile}', '/tmp/introducer/private/introducer.furl');
-      $introducer->succeed('daemonize $(type -p tahoe) run /tmp/introducer');
-      $introducer->waitForOpenPort(${toString introducerPort});
+      $introducer->succeed(
+          'tahoe create-introducer ' .
+          '--port tcp:${toString introducerPort} ' .
+          '--location tcp:introducer:${toString introducerPort} ' .
+          '/tmp/introducer'
+      );
+      $introducer->copyFileFromHost(
+          '${pemFile}',
+          '/tmp/introducer/private/node.pem'
+      );
+      $introducer->copyFileFromHost(
+          '${introducerFURLFile}',
+          '/tmp/introducer/private/introducer.furl'
+      );
+      $introducer->succeed(
+          'daemonize ' .
+          '-e /tmp/stderr ' .
+          '-o /tmp/stdout ' .
+          '$(type -p tahoe) run /tmp/introducer'
+      );
+
+      eval {
+        $introducer->waitForOpenPort(${toString introducerPort});
+        # Signal success. :/
+        1;
+      } or do {
+        my $error = $@ || 'Unknown failure';
+        my ($code, $log) = $introducer->execute('cat /tmp/stdout /tmp/stderr');
+        $introducer->log($log);
+        die $@;
+      };
 
       #
       # Get a Tahoe-LAFS storage server up.
@@ -162,6 +188,35 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
 
       # Create a Tahoe-LAFS client on it.
-      $client->succeed('tahoe create-client --shares-needed 1 --shares-happy 1 --shares-total 1 --introducer ${introducerFURL}');
+      $client->succeed(
+          'tahoe create-client ' .
+          '--shares-needed 1 ' .
+          '--shares-happy 1 ' .
+          '--shares-total 1 ' .
+          '--introducer ${introducerFURL} /tmp/client'
+      );
+
+      # Launch it
+      $client->succeed(
+          'daemonize ' .
+          '-e /tmp/stderr ' .
+          '-o /tmp/stdout ' .
+          '$(type -p tahoe) run /tmp/client'
+      );
+      $client->waitForOpenPort(3456);
+
+      my ($code, $out) = $client->execute(
+          'tahoe -d /tmp/client ' .
+          'put /etc/issue'
+      );
+      ($code == 0) or do {
+          my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
+          $client->log($log);
+          die "put failed";
+      };
+      $client->succeed(
+          'tahoe -d /tmp/client ' .
+          "get $out"
+      );
     '';
 }
