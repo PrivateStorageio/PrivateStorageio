@@ -94,10 +94,12 @@ import <nixpkgs/nixos/tests/make-test.nix> {
   # Test the machine with a Perl program (sobbing).
   testScript =
     ''
+      # Start booting all the VMs in parallel to speed up operations down below.
+      startAll;
+
       #
       # Set up a Tahoe-LAFS introducer.
       #
-      $introducer->start;
       $introducer->succeed('tahoe create-introducer --hostname introducer /tmp/introducer');
       $introducer->copyFileFromHost('${pemFile}', '/tmp/introducer/private/node.pem');
       $introducer->copyFileFromHost('${introducerFURLFile}', '/tmp/introducer/private/introducer.furl');
@@ -107,9 +109,6 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Get a Tahoe-LAFS storage server up.
       #
-
-      # Boot the storage VM.
-      $storage->start;
 
       # The systemd unit should reach the running state.
       $storage->waitForUnit('tahoe.storage.service');
@@ -126,9 +125,6 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-
-      # Boot another VM.
-      $client->start;
 
       # Create a Tahoe-LAFS client on it.
       $client->succeed('tahoe create-client --shares-needed 1 --shares-happy 1 --shares-total 1 --introducer ${introducerFURL}');
