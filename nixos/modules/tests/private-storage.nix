@@ -13,48 +13,18 @@ let
     name = "introducer.furl";
     text = introducerFURL;
   };
-
-  # setupNetwork :: Set Name (Set -> AttrSet) -> Set Name (Set -> AttrSet)
-  setupNetwork = nodes:
-    let
-      # makeNetwork :: Integer -> AttrSet
-      makeNetwork = n: {
-        # Just need to disable the firewall so all the traffic flows freely.
-        # We could do other network configuration here too, if we wanted.
-        # Initially I thought we might need to statically asssign IPs but we
-        # can just use the node names, "introducer", etc, instead.
-        networking.firewall.enable = false;
-      };
-      # addresses :: [Integer]
-      addresses = pkgs.lib.range 0 (builtins.length (builtins.attrNames nodes));
-      # nodesAsList :: [(Name, (Set -> AttrSet))]
-      nodesAsList = pkgs.lib.attrsets.mapAttrsToList (name: value: [name value]) nodes;
-      # nodeAndNetworkList :: [[Name, Set -> AttrSet], Integer]
-      nodeAndNetworkList = pkgs.lib.lists.zipListsWith (fst: snd: [fst snd]) nodesAsList addresses;
-
-      # mergeNodeAndNetwork :: Integer -> Name -> (Set -> AttrSet) -> {Name, (Set -> AttrSet)}
-      mergeNodeAndNetwork = number: name: node: {
-        inherit name;
-        # Sadly we have to name arguments in this definition to get them
-        # automatically passed in by the various autocall helpers in Nix.
-        value = args@{ pkgs, ... }: ((node args) // (makeNetwork number));
-      };
-      at = builtins.elemAt;
-      merged = map (elem:
-        let
-          node = (at (at elem 0) 1);
-          name = (at (at elem 0) 0);
-          number = (at elem 1);
-        in
-          mergeNodeAndNetwork number name node
-      ) nodeAndNetworkList;
-    in
-      builtins.listToAttrs merged;
+  networkConfig = {
+    # Just need to disable the firewall so all the traffic flows freely.  We
+    # could do other network configuration here too, if we wanted.  Initially
+    # I thought we might need to statically asssign IPs but we can just use
+    # the node names, "introducer", etc, instead.
+    networking.firewall.enable = false;
+  };
 in
 # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
 import <nixpkgs/nixos/tests/make-test.nix> {
 
-  nodes = setupNetwork rec {
+  nodes = rec {
     # Get a machine where we can run a Tahoe-LAFS client node.
     client =
       { config, pkgs, ... }:
@@ -62,7 +32,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
           pkgs.tahoe-lafs
           pkgs.daemonize
         ];
-      };
+      } // networkConfig;
 
     # Get another machine where we can run a Tahoe-LAFS introducer node.  It has the same configuration as the client.
     introducer = client;
@@ -76,7 +46,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         services.private-storage.enable = true;
         services.private-storage.publicIPv4 = "storage";
         services.private-storage.introducerFURL = introducerFURL;
-      };
+      } // networkConfig;
   };
 
   # Test the machines with a Perl program (sobbing).
