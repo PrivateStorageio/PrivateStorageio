@@ -47,6 +47,15 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         services.private-storage.publicIPv4 = "storage";
         services.private-storage.introducerFURL = introducerFURL;
       } // networkConfig;
+
+    # Operate an issuer as well.
+    issuer =
+    { config, pkgs, ... }:
+    { imports =
+      [ ../issuer.nix
+      ];
+      services.private-storage-issuer.enable = true;
+    };
   };
 
   # Test the machines with a Perl program (sobbing).
@@ -135,6 +144,18 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       );
       $client->waitForOpenPort(3456);
 
+      #
+      # Get some ZKAPs from the issuer.
+      #
+
+      # Simulate a payment for a voucher.
+      $voucher = "0123456789";
+      $client->succeed("${simulate-payment} $voucher");
+
+      # Tell the client to redeem the voucher.
+      $client->succeed("${redeem-voucher} $voucher");
+
+      # The client should be prepped now.  Make it try to use some storage.
       my ($code, $out) = $client->execute(
           'tahoe -d /tmp/client ' .
           'put /etc/issue'
