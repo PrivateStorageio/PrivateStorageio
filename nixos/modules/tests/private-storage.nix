@@ -1,9 +1,18 @@
 let
   pkgs = import <nixpkgs> { };
+
+  # Separate helper programs so we can write as little perl inside a string
+  # inside a nix expression as possible.
+  run-introducer = ./run-introducer.py;
+  run-client = ./run-client.py;
+  get-passes = ./get-passes.py;
+  exercise-storage = ./exercise-storage.py;
+
   # Here are the preconstructed secrets which we can assign to the introducer.
   # This is a lot easier than having the introducer generate them and then
   # discovering and configuring the other nodes with them.
   pemFile = ./node.pem;
+
   tubID = "rr7y46ixsg6qmck4jkkc7hke6xe4sv5f";
   swissnum = "2k6p3wrabat5jrj7otcih4cjdema4q3m";
   introducerPort = 35151;
@@ -29,8 +38,10 @@ import <nixpkgs/nixos/tests/make-test.nix> {
     client =
       { config, pkgs, ... }:
       { environment.systemPackages = [
+          pkgs.python2
           pkgs.tahoe-lafs
           pkgs.daemonize
+          (pkgs.python3.withPackages (ps: [ ps.requests ]))
         ];
       } // networkConfig;
 
@@ -62,35 +73,14 @@ import <nixpkgs/nixos/tests/make-test.nix> {
   testScript =
     ''
       # Start booting all the VMs in parallel to speed up operations down below.
-      startAll;
+      # startAll;
 
-      #
       # Set up a Tahoe-LAFS introducer.
-      #
-      my ($code, $version) = $introducer->execute("tahoe --version");
-      $introducer->log($version);
-
-      $introducer->succeed(
-          'tahoe create-introducer ' .
-          '--port tcp:${toString introducerPort} ' .
-          '--location tcp:introducer:${toString introducerPort} ' .
-          '/tmp/introducer'
-      );
       $introducer->copyFileFromHost(
           '${pemFile}',
-          '/tmp/introducer/private/node.pem'
+          '/tmp/node.pem'
       );
-      $introducer->copyFileFromHost(
-          '${introducerFURLFile}',
-          '/tmp/introducer/private/introducer.furl'
-      );
-      $introducer->succeed(
-          'daemonize ' .
-          '-e /tmp/stderr ' .
-          '-o /tmp/stdout ' .
-          '$(type -p tahoe) run /tmp/introducer'
-      );
-
+      $introducer->succeed('set -eo pipefail; ${run-introducer} /tmp/node.pem ${toString introducerPort} ${introducerFURL} | systemd-cat');
       eval {
         $introducer->waitForOpenPort(${toString introducerPort});
         # Signal success. :/
@@ -105,7 +95,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Get a Tahoe-LAFS storage server up.
       #
-      my ($code, $version) = $storage->execute("tahoe --version");
+      my ($code, $version) = $storage->execute('tahoe --version');
       $storage->log($version);
 
       # The systemd unit should reach the running state.
@@ -123,51 +113,13 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-      my ($code, $version) = $client->execute("tahoe --version");
-      $client->log($version);
-
-      # Create a Tahoe-LAFS client on it.
-      $client->succeed(
-          'tahoe create-client ' .
-          '--shares-needed 1 ' .
-          '--shares-happy 1 ' .
-          '--shares-total 1 ' .
-          '--introducer ${introducerFURL} /tmp/client'
-      );
-
-      # Launch it
-      $client->succeed(
-          'daemonize ' .
-          '-e /tmp/stderr ' .
-          '-o /tmp/stdout ' .
-          '$(type -p tahoe) run /tmp/client'
-      );
+      $client->succeed('${run-client} ${introducerFURL}');
       $client->waitForOpenPort(3456);
 
-      #
       # Get some ZKAPs from the issuer.
-      #
-
-      # Simulate a payment for a voucher.
-      $voucher = "0123456789";
-      $client->succeed("${simulate-payment} $voucher");
-
-      # Tell the client to redeem the voucher.
-      $client->succeed("${redeem-voucher} $voucher");
+      $client->succeed('${get-passes} http://127.0.0.1:3456 http://issuer');
 
       # The client should be prepped now.  Make it try to use some storage.
-      my ($code, $out) = $client->execute(
-          'tahoe -d /tmp/client ' .
-          'put /etc/issue'
-      );
-      ($code == 0) or do {
-          my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
-          $client->log($log);
-          die "put failed";
-      };
-      $client->succeed(
-          'tahoe -d /tmp/client ' .
-          "get $out"
-      );
+      $client->succeed('${exercise-storage}');
     '';
 }
