@@ -1,5 +1,6 @@
 let
-  pkgs = import <nixpkgs> { };
+  pkgs = (import <nixpkgs> { });
+  pspkgs = import ../pspkgs.nix { inherit pkgs; };
 
   # Separate helper programs so we can write as little perl inside a string
   # inside a nix expression as possible.
@@ -38,9 +39,11 @@ import <nixpkgs/nixos/tests/make-test.nix> {
     client =
       { config, pkgs, ... }:
       { environment.systemPackages = [
-          pkgs.python2
-          pkgs.tahoe-lafs
           pkgs.daemonize
+          # A Tahoe-LAFS configuration capable of using the right storage
+          # plugin.
+          pspkgs.privatestorage
+          # Support for the tests we'll run.
           (pkgs.python3.withPackages (ps: [ ps.requests ]))
         ];
       } // networkConfig;
