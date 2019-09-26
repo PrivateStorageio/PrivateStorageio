@@ -4,6 +4,7 @@ from os import environ
 from sys import argv
 from shutil import which
 from subprocess import check_output
+from configparser import ConfigParser
 
 def main():
     (introducerFURL,) = argv[1:]
@@ -21,6 +22,18 @@ def main():
         "--introducer", introducerFURL,
         "/tmp/client",
     ])
+
+    # Add necessary ZKAPAuthorizer configuration bits.
+    config = ConfigParser()
+    with open("/tmp/client/tahoe.cfg") as cfg:
+        config.read_file(cfg)
+
+    config.set(u"client", u"storage.plugins", u"privatestorageio-zkapauthz-v1")
+    config.add_section(u"storageclient.plugins.privatestorageio-zkapauthz-v1")
+    config.set(u"storageclient.plugins.privatestorageio-zkapauthz-v1", u"redeemer", u"ristretto")
+
+    with open("/tmp/client/tahoe.cfg", "wt") as cfg:
+        config.write(cfg)
 
     run([
         "daemonize",
