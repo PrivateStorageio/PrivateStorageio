@@ -122,9 +122,16 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       $client->waitForOpenPort(3456);
 
       # Get some ZKAPs from the issuer.
-      $client->succeed('${get-passes} http://127.0.0.1:3456 http://issuer');
+      eval {
+        $client->succeed('set -eo pipefail; ${get-passes} http://127.0.0.1:3456 http://issuer:8081 | systemd-cat');
+      } or do {
+        my $error = $@ || 'Unknown failure';
+        my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
+        $client->log($log);
+        die $@;
+      };
 
       # The client should be prepped now.  Make it try to use some storage.
-      $client->succeed('${exercise-storage}');
+      $client->succeed('set -eo pipefail; ${exercise-storage} | systemd-cat');
     '';
 }
