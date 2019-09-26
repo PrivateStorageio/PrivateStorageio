@@ -118,7 +118,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-      $client->succeed('${run-client} ${introducerFURL}');
+      $client->succeed('set -eo pipefail; ${run-client} ${introducerFURL} | systemd-cat');
       $client->waitForOpenPort(3456);
 
       # Get some ZKAPs from the issuer.
