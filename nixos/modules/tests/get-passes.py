@@ -1,32 +1,46 @@
 #!/usr/bin/env python3
 
 from sys import argv
-from requests import post
+from requests import post, get, put
 from json import dumps
+from time import sleep
 
 def main():
     clientAPIRoot, issuerAPIRoot = argv[1:]
 
-    voucher = "0123456789"
-    zkapauthz = clientAPIRoot + "/storage-plugins/privatestorage-zkapauthorizer-v1"
+    # Construct a voucher that's acceptable to various parts of the system.
+    voucher = "a" * 44
+
+    zkapauthz = clientAPIRoot + "/storage-plugins/privatestorageio-zkapauthz-v1"
 
     # Simulate a payment for a voucher.
     post(
         issuerAPIRoot + "/v1/stripe/webhook",
         dumps(charge_succeeded_json(voucher)),
+        headers={"content-type": "application/json"},
     )
 
     # Tell the client to redeem the voucher.
-    post(
+    response = put(
         zkapauthz + "/voucher",
         dumps({"voucher": voucher}),
     )
+    if response.status_code // 100 != 2:
+        print("Unexpected response: {}".format(response.content))
+        response.raise_for_status()
 
     # Poll the vouchers list for a while to see it get redeemed.
-    expected = {"number": voucher, "redeemed": True}
+    expected = {"version": 1, "number": voucher, "redeemed": True}
+    def find_redeemed_voucher():
+        response = get(zkapauthz + "/voucher/" + voucher)
+        response.raise_for_status()
+        actual = response.json()
+        print("Actual response: {}".format(actual))
+        return expected == actual
+
     retry(
         "find redeemed voucher",
-        lambda: expected == get(zkapauthz + "/voucher/" + voucher),
+        find_redeemed_voucher,
     )
 
 
