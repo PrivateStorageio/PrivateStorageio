@@ -70,14 +70,15 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       [ ../issuer.nix
       ];
       services.private-storage-issuer.enable = true;
-    };
+
+    } // networkConfig;
   };
 
   # Test the machines with a Perl program (sobbing).
   testScript =
     ''
       # Start booting all the VMs in parallel to speed up operations down below.
-      # startAll;
+      startAll;
 
       # Set up a Tahoe-LAFS introducer.
       $introducer->copyFileFromHost(
