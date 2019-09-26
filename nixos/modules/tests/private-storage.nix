@@ -57,6 +57,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         services.private-storage.enable = true;
         services.private-storage.publicIPv4 = "storage";
         services.private-storage.introducerFURL = introducerFURL;
+        services.private-storage.issuerRootURL = "http://issuer/";
       } // networkConfig;
 
     # Operate an issuer as well.
