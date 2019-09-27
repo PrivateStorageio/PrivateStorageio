@@ -29,6 +29,7 @@ let
     # I thought we might need to statically asssign IPs but we can just use
     # the node names, "introducer", etc, instead.
     networking.firewall.enable = false;
+    networking.dhcpcd.enable = false;
   };
 in
 # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
