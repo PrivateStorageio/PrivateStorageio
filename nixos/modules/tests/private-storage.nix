@@ -97,7 +97,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         $introducer->succeed(
           'set -eo pipefail; ' .
           '${run-introducer} /tmp/node.pem ${toString introducerPort} ${introducerFURL} | ' .
-          systemd-cat'
+          'systemd-cat'
         );
         # Signal success. :/
         1;
