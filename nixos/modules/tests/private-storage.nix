@@ -124,6 +124,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       # Get some ZKAPs from the issuer.
       eval {
         $client->succeed('set -eo pipefail; ${get-passes} http://127.0.0.1:3456 http://issuer:8081 | systemd-cat');
+        # succeed() is not success but 1 is.
+        1;
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
