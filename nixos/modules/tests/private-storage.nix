@@ -134,6 +134,15 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       };
 
       # The client should be prepped now.  Make it try to use some storage.
-      $client->succeed('set -eo pipefail; ${exercise-storage} | systemd-cat');
-    '';
+      eval {
+        $client->succeed('set -eo pipefail; ${exercise-storage} /tmp/client | systemd-cat');
+        # nothing succeeds like ... 1.
+        1;
+      } or do {
+        my $error = $@ || 'Unknown failure';
+        my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
+        $client->log($log);
+        die $@;
+      };
+      '';
 }
