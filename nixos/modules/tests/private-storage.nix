@@ -92,9 +92,13 @@ import <nixpkgs/nixos/tests/make-test.nix> {
           '${pemFile}',
           '/tmp/node.pem'
       );
-      $introducer->succeed('set -eo pipefail; ${run-introducer} /tmp/node.pem ${toString introducerPort} ${introducerFURL} | systemd-cat');
+
       eval {
-        $introducer->waitForOpenPort(${toString introducerPort});
+        $introducer->succeed(
+          'set -eo pipefail; ' .
+          '${run-introducer} /tmp/node.pem ${toString introducerPort} ${introducerFURL} | ' .
+          systemd-cat'
+        );
         # Signal success. :/
         1;
       } or do {
