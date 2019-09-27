@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+#
+# Create a PrivateStorage.io-enabled Tahoe-LAFS client node and run it as a
+# daemon.  Exit with success when we think we've started it.
+#
+
 from os import environ
 from sys import argv
 from shutil import which

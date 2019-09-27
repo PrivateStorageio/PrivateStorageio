@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+#
+# Create a Tahoe-LAFS introducer node and run it as a daemon.  Exit with
+# success when it is accepting introducer client connections.
+#
+
 from sys import argv
 from os import environ, makedirs, rename
 from shutil import which

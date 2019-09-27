@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+#
+# Get a paid voucher and tell the Tahoe-LAFS client node to redeem it for some
+# ZKAPs from an issuer.  Exit with success when the Tahoe-LAFS client node
+# reports that the voucher has been redeemed.
+#
+
 from sys import argv
 from requests import post, get, put
 from json import dumps
