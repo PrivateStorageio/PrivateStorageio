@@ -49,7 +49,7 @@ def retry(description, f):
         print("trying to {}...".format(description))
         if f():
             print("{} succeeded".format(description))
-            break
+            return
         sleep(1.0)
     raise ValueError("failed to {} after many tries".format(description))
 
