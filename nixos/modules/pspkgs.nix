@@ -1,6 +1,6 @@
-# Derive a brand new version of pkgs which has our overlay applied.  The
-# overlay defines a new version of Tahoe-LAFS and some of its dependencies
-# and maybe other useful Private Storage customizations.
+# Derive a brand new version of pkgs which has our overlays applied.  This
+# includes the ZKAPAuthorizer overlay which defines some Python overrides as
+# well as our own which defines the `privatestorage` derivation.
 { pkgs }:
 import pkgs.path {
   overlays = [
