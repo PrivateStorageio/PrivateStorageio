@@ -69,7 +69,16 @@ import <nixpkgs/nixos/tests/make-test.nix> {
     { imports =
       [ ../issuer.nix
       ];
-      services.private-storage-issuer.enable = true;
+      services.private-storage-issuer = {
+        enable = true;
+        issuer = "Ristretto";
+        # Notionally, this is a secret key.  This is only the value for this
+        # system test though so I don't care if it leaks to the world at
+        # large.
+        ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
+      };
+
+
 
     } // networkConfig;
   };
