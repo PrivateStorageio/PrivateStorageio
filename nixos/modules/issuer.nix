@@ -3,6 +3,7 @@
 { lib, pkgs, config, ... }: let
   pspkgs = pkgs.callPackage ./pspkgs.nix { };
   zkapissuer = pspkgs.callPackage ../pkgs/zkapissuer.nix { };
+  cfg = config.services.private-storage-issuer;
 in {
   options = {
     services.private-storage-issuer.enable = lib.mkEnableOption "PrivateStorage ZKAP Issuer Service";
@@ -33,28 +34,25 @@ in {
     };
   };
 
-  config = let
-    cfg = config.services.private-storage-issuer;
-  in
-    lib.mkIf cfg.enable {
-      systemd.services.zkapissuer = {
-        enable = true;
-        description = "ZKAP Issuer";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "network.target" ];
+  config = lib.mkIf cfg.enable {
+    systemd.services.zkapissuer = {
+      enable = true;
+      description = "ZKAP Issuer";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
 
-        serviceConfig = {
-          ExecStart =
-            let
-              args =
-                if cfg.issuer == "Trivial"
-                  then "--issuer Trivial"
-                  else "--issuer Ristretto --signing-key ${cfg.ristrettoSigningKey}";
-            in
-              "${cfg.package}/bin/PaymentServer-exe ${args}";
-          Type = "simple";
-          Restart = "always";
-        };
+      serviceConfig = {
+        ExecStart =
+          let
+            args =
+              if cfg.issuer == "Trivial"
+                then "--issuer Trivial"
+                else "--issuer Ristretto --signing-key ${cfg.ristrettoSigningKey}";
+          in
+            "${cfg.package}/bin/PaymentServer-exe ${args}";
+        Type = "simple";
+        Restart = "always";
       };
     };
+  };
 }
