@@ -35,7 +35,7 @@ def main():
 
     retry(
         "waiting for open introducer port",
-        lambda: checkOpen(35151),
+        lambda: checkOpen(int(introducerPort)),
     )
 
 
