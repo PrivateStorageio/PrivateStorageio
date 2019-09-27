@@ -10,7 +10,7 @@ in {
     services.private-storage-issuer.package = lib.mkOption {
       default = zkapissuer.components.exes."PaymentServer-exe";
       type = lib.types.package;
-      example = lib.literalExample "pkgs.zkapissuer";
+      example = lib.literalExample "pkgs.zkapissuer.components.exes.\"PaymentServer-exe\"";
       description = ''
         The package to use for the ZKAP issuer.
       '';
@@ -35,6 +35,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # Add a systemd service to run PaymentServer.
     systemd.services.zkapissuer = {
       enable = true;
       description = "ZKAP Issuer";
@@ -44,6 +45,8 @@ in {
       serviceConfig = {
         ExecStart =
           let
+            # Compute the right command line arguments to pass to it.  The
+            # signing key is only supplied when using the Ristretto issuer.
             args =
               if cfg.issuer == "Trivial"
                 then "--issuer Trivial"
@@ -51,6 +54,9 @@ in {
           in
             "${cfg.package}/bin/PaymentServer-exe ${args}";
         Type = "simple";
+        # It really shouldn't ever exit on its own!  If it does, it's a bug
+        # we'll have to fix.  Restart it and hope it doesn't happen too much
+        # before we can fix whatever the issue is.
         Restart = "always";
       };
     };
