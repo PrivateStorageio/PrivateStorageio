@@ -1,7 +1,9 @@
-{ fetchFromGitHub }:
-fetchFromGitHub {
-  owner = "PrivateStorageio";
-  repo = "ZKAPAuthorizer";
-  rev = "36dd4c2cffa2e9df651dda4c9ac8977bafe2ed64";
-  sha256 = "sha256:1i5nli73gk56r5brmimcd97dkf7wd4mf6viw4vbcssa7xj6s84af";
-}
+let
+  pkgs = import <nixpkgs> {};
+in
+  pkgs.fetchFromGitHub {
+    owner = "PrivateStorageio";
+    repo = "ZKAPAuthorizer";
+    rev = "00387ea1d02a5800ff4480a3a177ecc87b34532f";
+    sha256 = "053bzpq68fz1y0qzyryxjmbpvpzshhxhkp404pviqdi18xyqgzyc";
+  }

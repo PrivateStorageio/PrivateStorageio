@@ -1,5 +1,5 @@
-{ fetchFromGitHub, python27Packages }:
+{ python27Packages }:
 let
-  zkapauthorizer = import ./zkapauthorizer-repo.nix { inherit fetchFromGitHub; };
+  zkapauthorizer = import ./zkapauthorizer-repo.nix;
 in
   python27Packages.callPackage "${zkapauthorizer}/zkapauthorizer.nix" { }

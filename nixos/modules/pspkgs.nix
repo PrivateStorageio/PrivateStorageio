@@ -4,8 +4,7 @@
 { pkgs }:
 import pkgs.path {
   overlays = [
-    # needs fetchFromGitHub to check out zkapauthorizer
-    (pkgs.callPackage ./zkap-overlay.nix { })
+    (import ./zkap-overlay.nix)
     (import ./overlays.nix)
   ];
 }
