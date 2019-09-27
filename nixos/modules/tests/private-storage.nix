@@ -78,9 +78,6 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         # large.
         ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
       };
-
-
-
     } // networkConfig;
   };
 
