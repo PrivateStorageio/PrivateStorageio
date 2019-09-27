@@ -1,0 +1,23 @@
+diff --git a/src/twisted/internet/_resolver.py b/src/twisted/internet/_resolver.py
+index 1c16174a2..8c8249db4 100644
+--- a/src/twisted/internet/_resolver.py
++++ b/src/twisted/internet/_resolver.py
+@@ -74,6 +74,8 @@ class GAIResolver(object):
+     L{getaddrinfo} in a thread.
+     """
+ 
++    _log = Logger()
++
+     def __init__(self, reactor, getThreadPool=None, getaddrinfo=getaddrinfo):
+         """
+         Create a L{GAIResolver}.
+@@ -124,6 +126,9 @@ class GAIResolver(object):
+                                          socketType)
+             except gaierror:
+                 return []
++            except Exception as e:
++                self._log.failure("Problem resolving {hostName}", hostName=hostName)
++                return []
+         d = deferToThreadPool(self._reactor, pool, get)
+         resolution = HostResolution(hostName)
+         resolutionReceiver.resolutionBegan(resolution)

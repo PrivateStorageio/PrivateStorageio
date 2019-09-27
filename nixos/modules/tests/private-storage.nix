@@ -1,9 +1,19 @@
 let
-  pkgs = import <nixpkgs> { };
+  pkgs = (import <nixpkgs> { });
+  pspkgs = import ../pspkgs.nix { inherit pkgs; };
+
+  # Separate helper programs so we can write as little perl inside a string
+  # inside a nix expression as possible.
+  run-introducer = ./run-introducer.py;
+  run-client = ./run-client.py;
+  get-passes = ./get-passes.py;
+  exercise-storage = ./exercise-storage.py;
+
   # Here are the preconstructed secrets which we can assign to the introducer.
   # This is a lot easier than having the introducer generate them and then
   # discovering and configuring the other nodes with them.
   pemFile = ./node.pem;
+
   tubID = "rr7y46ixsg6qmck4jkkc7hke6xe4sv5f";
   swissnum = "2k6p3wrabat5jrj7otcih4cjdema4q3m";
   introducerPort = 35151;
@@ -19,6 +29,7 @@ let
     # I thought we might need to statically asssign IPs but we can just use
     # the node names, "introducer", etc, instead.
     networking.firewall.enable = false;
+    networking.dhcpcd.enable = false;
   };
 in
 # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
@@ -29,8 +40,12 @@ import <nixpkgs/nixos/tests/make-test.nix> {
     client =
       { config, pkgs, ... }:
       { environment.systemPackages = [
-          pkgs.tahoe-lafs
           pkgs.daemonize
+          # A Tahoe-LAFS configuration capable of using the right storage
+          # plugin.
+          pspkgs.privatestorage
+          # Support for the tests we'll run.
+          (pkgs.python3.withPackages (ps: [ ps.requests ]))
         ];
       } // networkConfig;
 
@@ -46,7 +61,24 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         services.private-storage.enable = true;
         services.private-storage.publicIPv4 = "storage";
         services.private-storage.introducerFURL = introducerFURL;
+        services.private-storage.issuerRootURL = "http://issuer:8081/";
       } // networkConfig;
+
+    # Operate an issuer as well.
+    issuer =
+    { config, pkgs, ... }:
+    { imports =
+      [ ../issuer.nix
+      ];
+      services.private-storage-issuer = {
+        enable = true;
+        issuer = "Ristretto";
+        # Notionally, this is a secret key.  This is only the value for this
+        # system test though so I don't care if it leaks to the world at
+        # large.
+        ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
+      };
+    } // networkConfig;
   };
 
   # Test the machines with a Perl program (sobbing).
@@ -55,35 +87,18 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       # Start booting all the VMs in parallel to speed up operations down below.
       startAll;
 
-      #
       # Set up a Tahoe-LAFS introducer.
-      #
-      my ($code, $version) = $introducer->execute("tahoe --version");
-      $introducer->log($version);
-
-      $introducer->succeed(
-          'tahoe create-introducer ' .
-          '--port tcp:${toString introducerPort} ' .
-          '--location tcp:introducer:${toString introducerPort} ' .
-          '/tmp/introducer'
-      );
       $introducer->copyFileFromHost(
           '${pemFile}',
-          '/tmp/introducer/private/node.pem'
-      );
-      $introducer->copyFileFromHost(
-          '${introducerFURLFile}',
-          '/tmp/introducer/private/introducer.furl'
-      );
-      $introducer->succeed(
-          'daemonize ' .
-          '-e /tmp/stderr ' .
-          '-o /tmp/stdout ' .
-          '$(type -p tahoe) run /tmp/introducer'
+          '/tmp/node.pem'
       );
 
       eval {
-        $introducer->waitForOpenPort(${toString introducerPort});
+        $introducer->succeed(
+          'set -eo pipefail; ' .
+          '${run-introducer} /tmp/node.pem ${toString introducerPort} ${introducerFURL} | ' .
+          systemd-cat'
+        );
         # Signal success. :/
         1;
       } or do {
@@ -96,7 +111,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Get a Tahoe-LAFS storage server up.
       #
-      my ($code, $version) = $storage->execute("tahoe --version");
+      my ($code, $version) = $storage->execute('tahoe --version');
       $storage->log($version);
 
       # The systemd unit should reach the running state.
@@ -114,39 +129,31 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-      my ($code, $version) = $client->execute("tahoe --version");
-      $client->log($version);
-
-      # Create a Tahoe-LAFS client on it.
-      $client->succeed(
-          'tahoe create-client ' .
-          '--shares-needed 1 ' .
-          '--shares-happy 1 ' .
-          '--shares-total 1 ' .
-          '--introducer ${introducerFURL} /tmp/client'
-      );
-
-      # Launch it
-      $client->succeed(
-          'daemonize ' .
-          '-e /tmp/stderr ' .
-          '-o /tmp/stdout ' .
-          '$(type -p tahoe) run /tmp/client'
-      );
+      $client->succeed('set -eo pipefail; ${run-client} ${introducerFURL} | systemd-cat');
       $client->waitForOpenPort(3456);
 
-      my ($code, $out) = $client->execute(
-          'tahoe -d /tmp/client ' .
-          'put /etc/issue'
-      );
-      ($code == 0) or do {
-          my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
-          $client->log($log);
-          die "put failed";
+      # Get some ZKAPs from the issuer.
+      eval {
+        $client->succeed('set -eo pipefail; ${get-passes} http://127.0.0.1:3456 http://issuer:8081 | systemd-cat');
+        # succeed() is not success but 1 is.
+        1;
+      } or do {
+        my $error = $@ || 'Unknown failure';
+        my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
+        $client->log($log);
+        die $@;
       };
-      $client->succeed(
-          'tahoe -d /tmp/client ' .
-          "get $out"
-      );
-    '';
+
+      # The client should be prepped now.  Make it try to use some storage.
+      eval {
+        $client->succeed('set -eo pipefail; ${exercise-storage} /tmp/client | systemd-cat');
+        # nothing succeeds like ... 1.
+        1;
+      } or do {
+        my $error = $@ || 'Unknown failure';
+        my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
+        $client->log($log);
+        die $@;
+      };
+      '';
 }
