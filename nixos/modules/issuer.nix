@@ -14,6 +14,23 @@ in {
         The package to use for the ZKAP issuer.
       '';
     };
+    services.private-storage-issuer.issuer = lib.mkOption {
+      default = "Ristretto";
+      type = lib.types.str;
+      example = lib.literalExample "Trivial";
+      description = ''
+        The issuer algorithm to use.  Either Trivial for a fake no-crypto
+        algorithm or Ristretto for Ristretto-flavored PrivacyPass.
+      '';
+    };
+    services.private-storage-issuer.ristrettoSigningKey = lib.mkOption {
+      default = null;
+      type = lib.types.str;
+      description = ''
+        The Ristretto signing key to use.  Required if the issuer is
+        ``Ristretto``.
+      '';
+    };
   };
 
   config = let
@@ -27,7 +44,14 @@ in {
         after = [ "network.target" ];
 
         serviceConfig = {
-          ExecStart = "${cfg.package}/bin/PaymentServer-exe";
+          ExecStart =
+            let
+              args =
+                if cfg.issuer == "Trivial"
+                  then "--issuer Trivial"
+                  else "--issuer Ristretto --signing-key ${cfg.ristrettoSigningKey}";
+            in
+              "${cfg.package}/bin/PaymentServer-exe ${args}";
           Type = "simple";
           Restart = "always";
         };
