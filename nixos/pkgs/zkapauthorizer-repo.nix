@@ -4,6 +4,6 @@ in
   pkgs.fetchFromGitHub {
     owner = "PrivateStorageio";
     repo = "ZKAPAuthorizer";
-    rev = "00387ea1d02a5800ff4480a3a177ecc87b34532f";
-    sha256 = "053bzpq68fz1y0qzyryxjmbpvpzshhxhkp404pviqdi18xyqgzyc";
+    rev = "6bde7dfd7b47bed2b994440f3139698fbca23e00";
+    sha256 = "1018kq7q6302j4631kh612f9ykgk3417dbabp9g93nr4bfg58sv5";
   }
