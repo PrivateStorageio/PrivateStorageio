@@ -12,7 +12,7 @@ from subprocess import check_output
 from configparser import ConfigParser
 
 def main():
-    (introducerFURL,) = argv[1:]
+    (introducerFURL, issuerURL) = argv[1:]
 
     # PYTHONHOME set for Python 3 for this script breaks Python 2 used by
     # Tahoe. :/ This is kind of a NixOS Python packaging bug.
@@ -36,6 +36,7 @@ def main():
     config.set(u"client", u"storage.plugins", u"privatestorageio-zkapauthz-v1")
     config.add_section(u"storageclient.plugins.privatestorageio-zkapauthz-v1")
     config.set(u"storageclient.plugins.privatestorageio-zkapauthz-v1", u"redeemer", u"ristretto")
+    config.set(u"storageclient.plugins.privatestorageio-zkapauthz-v1", u"ristretto-issuer-root-url", issuerURL)
 
     with open("/tmp/client/tahoe.cfg", "wt") as cfg:
         config.write(cfg)

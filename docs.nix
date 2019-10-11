@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> { } }:
+{ pkgs ? import ./nixpkgs.nix { } }:
 let
   # NixOS 19.03 packaged graphviz has trouble rendering our architecture
   # overview.  Latest from upstream does alright, though.  Use that.

@@ -2,8 +2,8 @@ let
   pkgs = import <nixpkgs> {};
 in
   pkgs.fetchFromGitHub {
-    owner = "PrivateStorageio";
-    repo = "ZKAPAuthorizer";
-    rev = "6bde7dfd7b47bed2b994440f3139698fbca23e00";
-    sha256 = "1018kq7q6302j4631kh612f9ykgk3417dbabp9g93nr4bfg58sv5";
+    owner = "privatestorageio";
+    repo = "zkapauthorizer";
+    rev = "0ae5bb532b9dfd515c65852bdbe86bd85d70f0e8";
+    sha256 = "06vsy7lbn4j9rwgzb5qcjj6255x27q1a2z84xphr0675rdi27f4f";
   }

@@ -1,6 +1,6 @@
 # The overall unit test suite for PrivateStorageio NixOS configuration.
 let
-  pkgs = import <nixpkgs> { };
+  pkgs = import ../nixpkgs.nix { };
 
   # Total the numbers in a list.
   sum = builtins.foldl' (a: b: a + b) 0;

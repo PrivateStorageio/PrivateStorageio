@@ -1,5 +1,5 @@
 let
-  pkgs = (import <nixpkgs> { });
+  pkgs = (import ../../../nixpkgs.nix { });
   pspkgs = import ../pspkgs.nix { inherit pkgs; };
 
   # Separate helper programs so we can write as little perl inside a string
@@ -8,6 +8,14 @@ let
   run-client = ./run-client.py;
   get-passes = ./get-passes.py;
   exercise-storage = ./exercise-storage.py;
+
+  # The root URL of the Ristretto-flavored PrivacyPass issuer API.
+  issuerURL = "http://issuer:8081/";
+
+  # The issuer's signing key.  Notionally, this is a secret key.  This is only
+  # the value for this system test though so I don't care if it leaks to the
+  # world at large.
+  ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
 
   # Here are the preconstructed secrets which we can assign to the introducer.
   # This is a lot easier than having the introducer generate them and then
@@ -61,7 +69,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         services.private-storage.enable = true;
         services.private-storage.publicIPv4 = "storage";
         services.private-storage.introducerFURL = introducerFURL;
-        services.private-storage.issuerRootURL = "http://issuer:8081/";
+        services.private-storage.issuerRootURL = issuerURL;
+        services.private-storage.ristrettoSigningKeyPath = pkgs.writeText "signing-key.private" ristrettoSigningKey;
       } // networkConfig;
 
     # Operate an issuer as well.
@@ -73,10 +82,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       services.private-storage-issuer = {
         enable = true;
         issuer = "Ristretto";
-        # Notionally, this is a secret key.  This is only the value for this
-        # system test though so I don't care if it leaks to the world at
-        # large.
-        ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
+        inherit ristrettoSigningKey;
       };
     } // networkConfig;
   };
@@ -129,7 +135,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-      $client->succeed('set -eo pipefail; ${run-client} ${introducerFURL} | systemd-cat');
+      $client->succeed('set -eo pipefail; ${run-client} ${introducerFURL} ${issuerURL} | systemd-cat');
       $client->waitForOpenPort(3456);
 
       # Get some ZKAPs from the issuer.
