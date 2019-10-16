@@ -1,4 +1,4 @@
 let
-  zkapauthorizer = import ../pkgs/zkapauthorizer-repo.nix;
+  src = import ../pkgs/zkapauthorizer-repo.nix;
 in
-  import "${zkapauthorizer}/overlays.nix"
+  import "${src}/overlays.nix"

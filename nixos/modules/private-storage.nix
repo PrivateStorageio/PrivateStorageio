@@ -63,6 +63,13 @@ in
         The URL of the Ristretto issuer service to announce.
       '';
     };
+    services.private-storage.ristrettoSigningKeyPath = lib.mkOption
+    { type = lib.types.path;
+      example = lib.literalExample "/var/run/secrets/signing-key.private";
+      description = ''
+        The path to the Ristretto signing key for the service.
+      '';
+    };
   };
 
   # Define configuration based on values given for our options - starting with
@@ -108,6 +115,7 @@ in
         };
         "storageserver.plugins.privatestorageio-zkapauthz-v1" =
         { "ristretto-issuer-root-url" = cfg.issuerRootURL;
+          "ristretto-signing-key-path" = cfg.ristrettoSigningKeyPath;
         };
       };
     };

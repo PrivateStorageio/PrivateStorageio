@@ -1,6 +1,6 @@
 # Functionality related to writing out ini syntax files (like Tahoe-LAFS'
 # tahoe.cfg).
-{ pkgs ? import <nixpkgs> { } }:
+{ pkgs }:
 let lib = pkgs.lib;
 in rec {
   # Get the .ini-file-appropriate string representation of a simple value.
