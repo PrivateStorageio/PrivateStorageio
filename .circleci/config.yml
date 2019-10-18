@@ -33,6 +33,27 @@ jobs:
             export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
             nix-build nixos/unit-tests.nix && cat result
 
+  system-tests-driver:
+    # Cannot actually run the system tests on CircleCI but we can build
+    # everything that makes them up.  This by itself can catch a lot of
+    # problems.
+    docker:
+      - image: "nixos/nix:2.2.1"
+    steps:
+      - run:
+          name: "Install Git"
+          command: |
+            # Required for the checkout step
+            nix-env -i git openssh
+
+      - "checkout"
+
+      - run:
+          name: "Run Tests"
+          command: |
+            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
+            nix-build nixos/system-tests.nix -A driver
+
   build:
     docker:
       - image: "nixos/nix:2.2.1"
@@ -71,3 +92,4 @@ workflows:
     jobs:
       - "test"
       - "build"
+      - "system-tests-driver"
