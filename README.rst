@@ -7,6 +7,10 @@ Building
 --------
 
 The build system uses `Nix`_ which must be installed before anything can be built.
+Builds are tested against a particular nixpkgs revision.
+Start by exporting ``NIX_PATH`` to ensure you use the same revision::
+
+  $ export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
 
 Documentation
 ~~~~~~~~~~~~~
