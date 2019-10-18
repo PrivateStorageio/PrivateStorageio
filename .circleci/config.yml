@@ -58,10 +58,14 @@ jobs:
             - privatestorageio-nix-store-v2-
 
       - run:
-          name: "Run Tests"
+          name: "Build System Test Driver"
           command: |
             export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
             nix-build --max-jobs 1 nixos/system-tests.nix -A driver
+
+          # Give it a good long while.  PaymentServer and its dependencies, in
+          # particular, can take a while to build.
+          no_output_timeout: "20m"
 
       - save_cache:
           name: "Cache Nix Store Paths"
