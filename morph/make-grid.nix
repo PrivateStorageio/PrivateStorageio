@@ -5,7 +5,7 @@
 # server in the morph network.
 { name, nodes }:
 let
-  pkgs = import ../nixpkgs.nix { };
+  pkgs = import <nixpkgs> { };
   # Load our JSON configuration for later use.
   cfg = pkgs.lib.trivial.importJSON ./grid.config.json;
 in

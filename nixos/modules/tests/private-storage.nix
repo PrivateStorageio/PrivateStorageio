@@ -1,5 +1,5 @@
 let
-  pkgs = (import ../../../nixpkgs.nix { });
+  pkgs = import <nixpkgs> { };
   pspkgs = import ../pspkgs.nix { inherit pkgs; };
 
   # Separate helper programs so we can write as little perl inside a string
