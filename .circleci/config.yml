@@ -17,14 +17,8 @@ version: 2
 jobs:
   test:
     docker:
-      - image: "nixos/nix:2.2.1"
+      - image: "nixorg/nix:circleci"
     steps:
-      - run:
-          name: "Install Git"
-          command: |
-            # Required for the checkout step
-            nix-env -i git openssh
-
       - "checkout"
 
       - run:
@@ -38,7 +32,7 @@ jobs:
     # everything that makes them up.  This by itself can catch a lot of
     # problems.
     docker:
-      - image: "nixos/nix:2.2.1"
+      - image: "nixorg/nix:circleci"
     steps:
       - run:
           name: "Install Git"
@@ -83,7 +77,7 @@ jobs:
 
   build:
     docker:
-      - image: "nixos/nix:2.2.1"
+      - image: "nixorg/nix:circleci"
     steps:
       - run:
           name: "Install CA Certificates"
