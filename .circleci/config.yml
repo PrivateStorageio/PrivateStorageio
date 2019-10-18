@@ -46,7 +46,34 @@ jobs:
             # Required for the checkout step
             nix-env -i git openssh
 
+      - restore_cache:
+          # Get all of Nix's state relating to the particular revision of
+          # nixpkgs we're using.  It will always be the same.  CircleCI
+          # artifacts and nixpkgs store objects are probably mostly hosted in
+          # the same place (S3) so there's not a lot of difference for
+          # anything that's pre-built.  For anything we end up building
+          # ourselves, though, this saves us all of the build time (less the
+          # download time).
+          #
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          name: "Restore Nix Store Paths"
+          keys:
+            # Construct cache keys that allow sharing as long as nixpkgs
+            # revision is unchanged.
+            #
+            # If nixpkgs changes then potentially a lot of cached packages for
+            # the base system will be invalidated so we may as well drop them
+            # and make a new cache with the new packages.
+            - privatestorageio-nix-store-v1-{{ checksum "nixpkgs.rev" }}
+            - privatestorageio-nix-store-v1-
+
       - "checkout"
+
+      - save_cache:
+          name: "Cache Nix Store Paths"
+          key: privatestorageio-nix-store-v1-{{ checksum "nixpkgs.rev" }}
+          paths:
+            - "/nix"
 
       - run:
           name: "Run Tests"
