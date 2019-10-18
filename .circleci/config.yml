@@ -46,6 +46,8 @@ jobs:
             # Required for the checkout step
             nix-env -i git openssh
 
+      - "checkout"
+
       - restore_cache:
           # Get all of Nix's state relating to the particular revision of
           # nixpkgs we're using.  It will always be the same.  CircleCI
@@ -66,8 +68,6 @@ jobs:
             # and make a new cache with the new packages.
             - privatestorageio-nix-store-v1-{{ checksum "nixpkgs.rev" }}
             - privatestorageio-nix-store-v1-
-
-      - "checkout"
 
       - save_cache:
           name: "Cache Nix Store Paths"
