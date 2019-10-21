@@ -38,4 +38,9 @@ The system tests are run using this command::
 
 The system tests boot QEMU VMs which prevents them from running on CI at this time.
 
+Deployment
+----------
+
+See ``morph/README.rst``.
+
 .. _Nix: https://nixos.org/nix
