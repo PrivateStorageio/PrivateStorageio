@@ -1,2 +1,3 @@
 { "publicStoragePort": 8898
+, "ristrettoSigningKeyPath": "../../PrivateStorageSecrets/ristretto.signing-key"
 }

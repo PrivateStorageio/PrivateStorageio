@@ -1,5 +1,22 @@
-{ publicIPv4, publicStoragePort }:
-{ imports = [
+{ publicIPv4, publicStoragePort, ristrettoSigningKeyPath }: rec {
+
+  deployment = {
+    secrets = {
+      "ristretto-signing-key" = {
+        source = ristrettoSigningKeyPath;
+        destination = "/var/secrets/ristretto.signing-key";
+        owner.user = "root";
+        owner.group = "root";
+        permissions = "0400";
+        # Service name here matches the name defined by our tahoe-lafs nixos
+        # module.  It would be nice to not have to hard-code it here.  Can we
+        # extract it from the tahoe-lafs nixos module somehow?
+        action = ["sudo" "systemctl" "restart" "tahoe.storage.service"];
+      };
+    };
+  };
+
+  imports = [
     ./testing000-hardware.nix
     ../nixos/modules/private-storage.nix
   ];
@@ -8,5 +25,6 @@
   { enable = true;
     inherit publicIPv4;
     inherit publicStoragePort;
+    ristrettoSigningKeyPath = deployment.secrets.ristretto-signing-key.destination;
   };
 }
