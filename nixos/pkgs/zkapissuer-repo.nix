@@ -1,5 +1,5 @@
 let
-  pkgs = import ../../nixpkgs.nix {};
+  pkgs = import <nixpkgs> { };
 in
   pkgs.fetchFromGitHub {
     owner = "PrivateStorageio";

@@ -17,47 +17,86 @@ version: 2
 jobs:
   test:
     docker:
-      - image: "nixos/nix:2.2.1"
+      - image: "nixorg/nix:circleci"
     steps:
-      - run:
-          name: "Install Git"
-          command: |
-            # Required for the checkout step
-            nix-env -i git openssh
-
       - "checkout"
 
       - run:
           name: "Run Tests"
           command: |
+            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
             nix-build nixos/unit-tests.nix && cat result
+
+  system-tests-driver:
+    # Cannot actually run the system tests on CircleCI but we can build
+    # everything that makes them up.  This by itself can catch a lot of
+    # problems.
+    docker:
+      - image: "nixorg/nix:circleci"
+    steps:
+      - "checkout"
+
+      - restore_cache:
+          # Get all of Nix's state relating to the particular revision of
+          # nixpkgs we're using.  It will always be the same.  CircleCI
+          # artifacts and nixpkgs store objects are probably mostly hosted in
+          # the same place (S3) so there's not a lot of difference for
+          # anything that's pre-built.  For anything we end up building
+          # ourselves, though, this saves us all of the build time (less the
+          # download time).
+          #
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          name: "Restore Nix Store Paths"
+          keys:
+            # Construct cache keys that allow sharing as long as nixpkgs
+            # revision is unchanged.
+            #
+            # If nixpkgs changes then potentially a lot of cached packages for
+            # the base system will be invalidated so we may as well drop them
+            # and make a new cache with the new packages.
+            - privatestorageio-nix-store-v2-{{ checksum "nixpkgs.rev" }}
+            - privatestorageio-nix-store-v2-
+
+      - run:
+          name: "Build System Test Driver"
+          command: |
+            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
+            nix-build --max-jobs 1 --cores 1 nixos/system-tests.nix -A driver
+
+          # Give it a good long while.  PaymentServer and its dependencies, in
+          # particular, can take a while to build.
+          no_output_timeout: "20m"
+
+      - save_cache:
+          name: "Cache Nix Store Paths"
+          key: privatestorageio-nix-store-v2-{{ checksum "nixpkgs.rev" }}
+          paths:
+            - "/nix"
 
   build:
     docker:
-      - image: "nixos/nix:2.2.1"
+      - image: "nixorg/nix:circleci"
     steps:
-      - run:
-          name: "Install CA Certificates"
-          command: |
-            # Required for cache and artifact interactions.  Though we use a
-            # nix image, it's actually an alpine base...  The CircleCI cache
-            # management (which we stopped using) and artifact uploader don't
-            # know how to use the nix ca bundle we could install.
-            apk update
-            apk add ca-certificates
-
-      - run:
-          name: "Install Git"
-          command: |
-            # Required for the checkout step
-            nix-env -i git openssh
-
       - "checkout"
+
+      - restore_cache:
+          # See comments for nix store caching in `build` job.
+          name: "Restore Nix Store Paths"
+          keys:
+            - privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.rev" }}
+            - privatestorageio-docs-nix-store-v1-
 
       - run:
           name: "Nix Build"
           command: |
+            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
             nix-build docs.nix
+
+      - save_cache:
+          name: "Cache Nix Store Paths"
+          key: privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.rev" }}
+          paths:
+            - "/nix"
 
       - store_artifacts:
           path: "result/docs"

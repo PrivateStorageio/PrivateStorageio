@@ -17,10 +17,6 @@ log = print
 def main():
     pemFile, introducerPort, introducerFURL = argv[1:]
 
-    # PYTHONHOME set for Python 3 for this script breaks Python 2 used by
-    # Tahoe. :/ This is kind of a NixOS Python packaging bug.
-    del environ["PYTHONHOME"]
-
     run(["tahoe", "--version"])
     run([
         "tahoe", "create-introducer",

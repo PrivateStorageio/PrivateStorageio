@@ -7,6 +7,10 @@ Building
 --------
 
 The build system uses `Nix`_ which must be installed before anything can be built.
+Builds are tested against a particular nixpkgs revision.
+Start by exporting ``NIX_PATH`` to ensure you use the same revision::
+
+  $ export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
 
 Documentation
 ~~~~~~~~~~~~~
@@ -33,5 +37,10 @@ The system tests are run using this command::
   $ nix-build nixos/system-tests.nix
 
 The system tests boot QEMU VMs which prevents them from running on CI at this time.
+
+Deployment
+----------
+
+See ``morph/README.rst``.
 
 .. _Nix: https://nixos.org/nix

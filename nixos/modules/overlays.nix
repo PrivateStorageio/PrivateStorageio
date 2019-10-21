@@ -34,6 +34,10 @@ self: super: {
   # the value from the previously overlay, not from the fixed point.  This is
   # important because this override never converges.
   python27 = super.python27.override (old: {
-    packageOverrides = super.lib.composeExtensions old.packageOverrides pythonTwistedOverride;
+    packageOverrides =
+      if old ? packageOverrides then
+        super.lib.composeExtensions old.packageOverrides pythonTwistedOverride
+      else
+        pythonTwistedOverride;
   });
 }
