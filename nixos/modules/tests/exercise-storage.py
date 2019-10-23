@@ -40,23 +40,31 @@ def get_api_root(path):
         return hyperlink.URL.from_text(f.read().strip())
 
 def tahoe_put(api_root, data, **kwargs):
-    response = requests.put(api_root.child(u"uri"), BytesIO(data))
+    response = requests.put(
+        api_root.child(u"uri").to_uri(),
+        BytesIO(data),
+    )
     response.raise_for_status()
     return response.text
 
 def tahoe_get(api_root, cap):
-    response = requests.get(api_root.child(u"uri", cap), stream=True)
+    response = requests.get(
+        api_root.child(u"uri", cap).to_uri(),
+        stream=True,
+    )
     response.raise_for_status()
     return response.raw.read()
 
 def tahoe_mkdir(api_root):
-    response = requests.post(api_root.child(u"uri").replace(query={u"t": u"mkdir", u"format": u"mdmf"}))
+    response = requests.post(
+        api_root.child(u"uri").replace(query={u"t": u"mkdir", u"format": u"mdmf"}).to_uri(),
+    )
     response.raise_for_status()
     return response.text
 
 def tahoe_link(api_root, dir_cap, name, subject_cap):
     response = requests.post(
-        api_root.child(u"uri", dir_cap, name).replace(query={u"t": u"uri"}),
+        api_root.child(u"uri", dir_cap, name).replace(query={u"t": u"uri"}).to_uri(),
         BytesIO(subject_cap),
     )
     response.raise_for_status()
