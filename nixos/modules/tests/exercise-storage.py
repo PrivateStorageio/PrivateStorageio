@@ -12,6 +12,7 @@ from subprocess import check_output
 from io import BytesIO
 
 import requests
+import hyperlink
 
 def main():
     (clientDir,) = argv[1:]
@@ -19,28 +20,52 @@ def main():
     someData = urandom(2 ** 16)
 
     api_root = get_api_root(clientDir)
-    cap = put(api_root, someData)
-    dataReadBack = get(api_root, cap)
 
+    exercise_immutable(api_root, someData)
+    exercise_mkdir(api_root)
+
+def exercise_immutable(api_root, someData):
+    cap = tahoe_put(api_root, someData)
+    dataReadBack = tahoe_get(api_root, cap)
     assert someData == dataReadBack
+    return cap
 
+def exercise_mkdir(api_root):
+    cap = tahoe_mkdir(api_root)
+    info = tahoe_stat(api_root, cap)
+    assert info
 
 def get_api_root(path):
     with open(path + u"/node.url") as f:
-        return f.read().strip()
+        return hyperlink.URL.from_text(f.read().strip())
 
-
-def put(api_root, data):
-    response = requests.put(api_root + u"uri", BytesIO(data))
+def tahoe_put(api_root, data, **kwargs):
+    response = requests.put(api_root.child(u"uri"), BytesIO(data))
     response.raise_for_status()
     return response.text
 
-
-def get(api_root, cap):
-    response = requests.get(api_root + u"uri/" + cap, stream=True)
+def tahoe_get(api_root, cap):
+    response = requests.get(api_root.child(u"uri", cap), stream=True)
     response.raise_for_status()
     return response.raw.read()
 
+def tahoe_mkdir(api_root):
+    response = requests.post(api_root.child(u"uri").replace(query={u"t": u"mkdir", u"format": u"mdmf"}))
+    response.raise_for_status()
+    return response.text
+
+def tahoe_link(api_root, dir_cap, name, subject_cap):
+    response = requests.post(
+        api_root.child(u"uri", dir_cap, name).replace(query={u"t": u"uri"}),
+        BytesIO(subject_cap),
+    )
+    response.raise_for_status()
+    return response.text
+
+def tahoe_stat(api_root, cap):
+    response = requests.post(api_root.child(u"uri", cap).replace(query={u"t": u"json"}))
+    response.raise_for_status()
+    return response.json
 
 if __name__ == u'__main__':
     main()

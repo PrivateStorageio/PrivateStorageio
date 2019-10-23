@@ -53,7 +53,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
           # plugin.
           pspkgs.privatestorage
           # Support for the tests we'll run.
-          (pkgs.python3.withPackages (ps: [ ps.requests ]))
+          (pkgs.python3.withPackages (ps: [ ps.requests ps.hyperlink ]))
         ];
       } // networkConfig;
 
