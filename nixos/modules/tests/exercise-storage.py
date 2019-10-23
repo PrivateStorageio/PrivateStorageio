@@ -63,7 +63,9 @@ def tahoe_link(api_root, dir_cap, name, subject_cap):
     return response.text
 
 def tahoe_stat(api_root, cap):
-    response = requests.post(api_root.child(u"uri", cap).replace(query={u"t": u"json"}))
+    response = requests.get(
+        api_root.child(u"uri", cap).replace(query={u"t": u"json"}).to_uri(),
+    )
     response.raise_for_status()
     return response.json
 
