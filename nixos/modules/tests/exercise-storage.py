@@ -21,8 +21,9 @@ def main():
 
     api_root = get_api_root(clientDir)
 
-    exercise_immutable(api_root, someData)
-    exercise_mkdir(api_root)
+    subject_cap = exercise_immutable(api_root, someData)
+    newDir = exercise_mkdir(api_root)
+    exercise_link_unlink(api_root, newDir, subject_cap)
 
 def exercise_immutable(api_root, someData):
     cap = tahoe_put(api_root, someData)
@@ -34,6 +35,13 @@ def exercise_mkdir(api_root):
     cap = tahoe_mkdir(api_root)
     info = tahoe_stat(api_root, cap)
     assert info
+    return info[1][u"rw_uri"]
+
+def exercise_link_unlink(api_root, dir_cap, subject_cap):
+    tahoe_link(api_root, dir_cap, u"foo", subject_cap)
+    assert u"foo" in tahoe_stat(api_root, dir_cap)[1][u"children"]
+    tahoe_unlink(api_root, dir_cap, u"foo")
+    assert u"foo" not in tahoe_stat(api_root, dir_cap)[1][u"children"]
 
 def get_api_root(path):
     with open(path + u"/node.url") as f:
@@ -63,9 +71,9 @@ def tahoe_mkdir(api_root):
     return response.text
 
 def tahoe_link(api_root, dir_cap, name, subject_cap):
-    response = requests.post(
+    response = requests.put(
         api_root.child(u"uri", dir_cap, name).replace(query={u"t": u"uri"}).to_uri(),
-        BytesIO(subject_cap),
+        BytesIO(subject_cap.encode("ascii")),
     )
     response.raise_for_status()
     return response.text
@@ -75,7 +83,14 @@ def tahoe_stat(api_root, cap):
         api_root.child(u"uri", cap).replace(query={u"t": u"json"}).to_uri(),
     )
     response.raise_for_status()
-    return response.json
+    return response.json()
+
+def tahoe_unlink(api_root, dir_cap, name):
+    response = requests.delete(
+        api_root.child(u"uri", dir_cap, name).to_uri(),
+    )
+    response.raise_for_status()
+    return response.text
 
 if __name__ == u'__main__':
     main()
