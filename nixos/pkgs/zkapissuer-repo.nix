@@ -1,9 +1,9 @@
 let
-  pkgs = import <nixpkgs> { };
+  pkgs = import <nixpkgs> {};
 in
   pkgs.fetchFromGitHub {
     owner = "PrivateStorageio";
     repo = "PaymentServer";
-    rev = "94fb418962abee71fa97c09c76e85ccc13cf4c1e";
-    sha256 = "15v71hqhs3rd8c77igbzbi2lbvrb6yyshasq3ijs51w7pwp10dac";
+    rev = "028d26152eba4f034aba405caa17627a764c2bbe";
+    sha256 = "06hdln97r2ign7phf661wlzh3z06bk9906lvc0gm3lh1pa23d3gb";
   }
