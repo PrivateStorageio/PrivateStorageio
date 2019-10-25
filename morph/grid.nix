@@ -19,6 +19,9 @@ import ./make-grid.nix {
 
     # Pass the whole grid configuration to the module and let it take what it
     # wants.
-    "storage000" = import ./storage000.nix cfg;
+    "storage000" = import ./make-storage.nix ({
+        cfg = import ./storage000-config.nix;
+        hardware = ./storage000-hardware.nix;
+    } // cfg);
   };
 }
