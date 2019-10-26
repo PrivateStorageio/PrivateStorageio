@@ -16,11 +16,6 @@ import ./make-grid.nix {
     # doesn't specify one.
     #
     # The names must be unique!
-    "storage000" = import ./make-storage.nix ({
-        cfg = import ./storage000-config.nix;
-        hardware = ./storage000-hardware.nix;
-        stateVersion = "19.09";
-    } // cfg);
     "storage001" = import ./make-storage.nix ({
         cfg = import ./storage001-config.nix;
         hardware = ./storage001-hardware.nix;
