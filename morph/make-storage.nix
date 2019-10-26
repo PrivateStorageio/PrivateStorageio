@@ -3,6 +3,13 @@
 , hardware                   # The path to the hardware configuration for this node.
 , publicStoragePort          # The storage port number on which to accept connections.
 , ristrettoSigningKeyPath    # The *local* path to the Ristretto signing key file.
+, stateVersion               # The value for system.stateVersion on this node.
+                             # This value determines the NixOS release with
+                             # which your system is to be compatible, in order
+                             # to avoid breaking some software such as
+                             # database servers. You should change this only
+                             # after NixOS release notes say you should.
+
 }: rec {
   deployment = {
     secrets = {
@@ -51,9 +58,5 @@
     ristrettoSigningKeyPath = deployment.secrets.ristretto-signing-key.destination;
   };
 
-  # This value determines the NixOS release with which your system is to be
-  # compatible, in order to avoid breaking some software such as database
-  # servers. You should change this only after NixOS release notes say you
-  # should.
-  system.stateVersion = "19.09"; # Did you read the comment?
+  system.stateVersion = stateVersion;
 }

@@ -19,26 +19,32 @@ import ./make-grid.nix {
     "storage000" = import ./make-storage.nix ({
         cfg = import ./storage000-config.nix;
         hardware = ./storage000-hardware.nix;
+        stateVersion = "19.09";
     } // cfg);
     "storage001" = import ./make-storage.nix ({
         cfg = import ./storage001-config.nix;
         hardware = ./storage001-hardware.nix;
+        stateVersion = "19.09";
     } // cfg);
     "storage002" = import ./make-storage.nix ({
         cfg = import ./storage002-config.nix;
         hardware = ./storage002-hardware.nix;
+        stateVersion = "19.09";
     } // cfg);
     "storage003" = import ./make-storage.nix ({
         cfg = import ./storage003-config.nix;
         hardware = ./storage003-hardware.nix;
+        stateVersion = "19.09";
     } // cfg);
     "storage004" = import ./make-storage.nix ({
         cfg = import ./storage004-config.nix;
         hardware = ./storage004-hardware.nix;
+        stateVersion = "19.09";
     } // cfg);
     "storage005" = import ./make-storage.nix ({
         cfg = import ./storage005-config.nix;
         hardware = ./storage005-hardware.nix;
+        stateVersion = "19.03";
     } // cfg);
   };
 }
