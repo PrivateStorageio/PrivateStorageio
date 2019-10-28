@@ -36,7 +36,9 @@
     # Bring in our module for configuring the Tahoe-LAFS service and other
     # Private Storage-specific things.
     ../nixos/modules/private-storage.nix
-   ];
+  ];
+
+  networking.hostId = "00000001";
 
   # Pass the configuration specific to this host to the 100TB module to be
   # expanded into a complete system configuration.  See the 100tb module for
