@@ -25,7 +25,6 @@
 
   # Manually created using:
   #   zpool create -f -m legacy -o ashift=12 root raidz /dev/disk/by-id/{wwn-0x5000cca25cc06670,wwn-0x5000cca244c94a41,wwn-0x5000cca24ceb8bb4,wwn-0x500003983bd01315,wwn-0x500003983bd812b2,wwn-0x5000cca25cc09d0c,wwn-0x5000c500921dd6b6}
-  #   mount.zfs root /storage
   fileSystems."/storage" =
     { device = "root";
       fsType = "zfs";
