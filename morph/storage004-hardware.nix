@@ -8,7 +8,7 @@
     [ <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
     ];
 
-  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "ehci_pci" "megaraid_sas" "usbhid" "usb_storage" "sd_mod" "sr_mod" ];
+  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "ehci_pci" "megaraid_sas" "usbhid" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
@@ -16,6 +16,13 @@
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/d628122e-05d9-4212-b6a5-4b9516d85dbe";
       fsType = "ext4";
+    };
+
+  # Manually created using:
+  #   zpool create -f -m legacy -o ashift=12 root raidz /dev/disk/by-id/{wwn-0x5000cca25cc0b6f9,wwn-0x5000cca25cc073af,wwn-0x5000cca25dcca3b5,wwn-0x5000cca25cc0addc,wwn-0x5000cca25cc08772,wwn-0x5000cca25dcc6f5f,wwn-0x5000cca25dcc4491}
+  fileSystems."/storage" =
+    { device = "root";
+      fsType = "zfs";
     };
 
   swapDevices = [ ];
