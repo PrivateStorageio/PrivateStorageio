@@ -34,7 +34,7 @@ let
   options = {
     hostId = lib.mkOption
     { type = lib.types.str;
-      example = lib.literalExample "abcdefgh";
+      example = lib.literalExample "abcdefab";
       description = "The 32-bit host ID of the machine, formatted as 8 hexadecimal characters.";
     };
     interface = lib.mkOption
