@@ -110,6 +110,8 @@ in
         };
         storage =
         { enabled = true;
+          # Put the storage where we have a lot of space configured.
+          storage_dir = "/storage";
           # Turn on our plugin.
           plugins = "privatestorageio-zkapauthz-v1";
         };
