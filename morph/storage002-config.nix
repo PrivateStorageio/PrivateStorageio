@@ -1,4 +1,5 @@
-{ "interface" = "eno1";
+{ "hostId" = "00000002";
+  "interface" = "eno1";
   "publicIPv4" = "37.120.214.110";
   "prefixLength" = 30;
   "gateway" = "37.120.214.109";
