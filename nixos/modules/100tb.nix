@@ -32,6 +32,11 @@ let
   # values.  This value is in the `let` to make the code below a little easier
   # to read.  See below where we use it.
   options = {
+    hostId = lib.mkOption
+    { type = lib.types.str;
+      example = lib.literalExample "abcdefab";
+      description = "The 32-bit host ID of the machine, formatted as 8 hexadecimal characters.";
+    };
     interface = lib.mkOption
     { type = lib.types.str;
       example = lib.literalExample "eno0";
@@ -113,6 +118,7 @@ in {
       cfg.rootPublicKey
     ];
 
+    networking.hostId = cfg.hostId;
     networking.dhcpcd.enable = false;
     networking.interfaces = {
       "${cfg.interface}".ipv4.addresses = [

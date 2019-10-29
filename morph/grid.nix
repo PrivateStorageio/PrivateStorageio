@@ -16,9 +16,30 @@ import ./make-grid.nix {
     # doesn't specify one.
     #
     # The names must be unique!
-
-    # Pass the whole grid configuration to the module and let it take what it
-    # wants.
-    "storage000" = import ./storage000.nix cfg;
+    "storage001" = import ./make-storage.nix ({
+        cfg = import ./storage001-config.nix;
+        hardware = ./storage001-hardware.nix;
+        stateVersion = "19.09";
+    } // cfg);
+    "storage002" = import ./make-storage.nix ({
+        cfg = import ./storage002-config.nix;
+        hardware = ./storage002-hardware.nix;
+        stateVersion = "19.09";
+    } // cfg);
+    "storage003" = import ./make-storage.nix ({
+        cfg = import ./storage003-config.nix;
+        hardware = ./storage003-hardware.nix;
+        stateVersion = "19.09";
+    } // cfg);
+    "storage004" = import ./make-storage.nix ({
+        cfg = import ./storage004-config.nix;
+        hardware = ./storage004-hardware.nix;
+        stateVersion = "19.09";
+    } // cfg);
+    "storage005" = import ./make-storage.nix ({
+        cfg = import ./storage005-config.nix;
+        hardware = ./storage005-hardware.nix;
+        stateVersion = "19.03";
+    } // cfg);
   };
 }

@@ -1,12 +1,16 @@
-let
-  # Get the configuration that's specific to this node.
-  cfg = import ./storage000-config.nix;
-in
-# Define the function that defines the node.  Accept the public storage server
-# port argument so we can configure Tahoe-LAFS with it.  Accept but ignore any
-# other arguments.
-{ publicStoragePort, ristrettoSigningKeyPath, ... }: rec {
+# Define the function that defines the node.
+{ cfg                        # Get the configuration that's specific to this node.
+, hardware                   # The path to the hardware configuration for this node.
+, publicStoragePort          # The storage port number on which to accept connections.
+, ristrettoSigningKeyPath    # The *local* path to the Ristretto signing key file.
+, stateVersion               # The value for system.stateVersion on this node.
+                             # This value determines the NixOS release with
+                             # which your system is to be compatible, in order
+                             # to avoid breaking some software such as
+                             # database servers. You should change this only
+                             # after NixOS release notes say you should.
 
+}: rec {
   deployment = {
     secrets = {
       "ristretto-signing-key" = {
@@ -26,13 +30,13 @@ in
   # Any extra NixOS modules to load on this server.
   imports = [
     # Include the results of the hardware scan.
-    ./storage000-hardware.nix
+    hardware
     # Configure it as a system operated by 100TB.
     ../nixos/modules/100tb.nix
     # Bring in our module for configuring the Tahoe-LAFS service and other
     # Private Storage-specific things.
     ../nixos/modules/private-storage.nix
-   ];
+  ];
 
   # Pass the configuration specific to this host to the 100TB module to be
   # expanded into a complete system configuration.  See the 100tb module for
@@ -54,9 +58,5 @@ in
     ristrettoSigningKeyPath = deployment.secrets.ristretto-signing-key.destination;
   };
 
-  # This value determines the NixOS release with which your system is to be
-  # compatible, in order to avoid breaking some software such as database
-  # servers. You should change this only after NixOS release notes say you
-  # should.
-  system.stateVersion = "19.03"; # Did you read the comment?
+  system.stateVersion = stateVersion;
 }
