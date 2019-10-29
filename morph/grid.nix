@@ -16,6 +16,11 @@ import ./make-grid.nix {
     # doesn't specify one.
     #
     # The names must be unique!
+    "issuer" = import ./issuer.nix ({
+      hardware = ./issuer-aws.nix;
+      stateVersion = "19.03";
+    } // cfg);
+
     "storage001" = import ./make-storage.nix ({
         cfg = import ./storage001-config.nix;
         hardware = ./storage001-hardware.nix;
