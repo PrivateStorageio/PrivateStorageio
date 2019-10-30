@@ -10,7 +10,7 @@ let
   exercise-storage = ./exercise-storage.py;
 
   # The root URL of the Ristretto-flavored PrivacyPass issuer API.
-  issuerURL = "http://issuer:8081/";
+  issuerURL = "http://issuer/";
 
   # The issuer's signing key.  Notionally, this is a secret key.  This is only
   # the value for this system test though so I don't care if it leaks to the
@@ -81,6 +81,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       ];
       services.private-storage-issuer = {
         enable = true;
+        domain = "issuer";
+        tls = false;
         issuer = "Ristretto";
         inherit ristrettoSigningKey;
       };
@@ -140,7 +142,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
 
       # Get some ZKAPs from the issuer.
       eval {
-        $client->succeed('set -eo pipefail; ${get-passes} http://127.0.0.1:3456 http://issuer:8081 | systemd-cat');
+        $client->succeed('set -eo pipefail; ${get-passes} http://127.0.0.1:3456 ${issuerURL} | systemd-cat');
         # succeed() is not success but 1 is.
         1;
       } or do {
