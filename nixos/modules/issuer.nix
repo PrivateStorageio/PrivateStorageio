@@ -129,7 +129,7 @@ in {
           email = "jean-paul@privatestorage.io";
           postRun = "systemctl restart zkapissuer.service";
           webroot = "${acme}/acme-challenges";
-          plugins = [ "full.pem" "fullchain.pem" "key.pem" ];
+          plugins = [ "account_key.json" "full.pem" "fullchain.pem" "key.pem" ];
         };
       }
       else {};
