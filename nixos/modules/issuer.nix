@@ -134,20 +134,6 @@ in {
       }
       else {};
 
-    systemd.timers = if cfg.tls
-      then {
-        "acme-${cfg.domain}-initial" = config.systemd.timers."acme-${cfg.domain}" // {
-          timerConfig = {
-            OnUnitActiveSec = "0";
-            Unit = "acme-${cfg.domain}.service";
-            Persistent = "yes";
-            AccuracySec = "1us";
-            RandomizedDelaySec = "0s";
-          };
-        };
-      }
-      else {};
-
     services.nginx.virtualHosts = if cfg.tls
       then {
         "${cfg.domain}" = {
