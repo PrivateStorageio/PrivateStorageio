@@ -129,8 +129,8 @@ in {
       };
     };
 
-    # Certificate renewal.  Note that preliminarySelfsigned only creates the
-    # service.  We must declare that we *require* it in our service above.
+    # Certificate renewal.  We must declare that we *require* it in our
+    # service above.
     systemd.services."cert-${cfg.domain}" = {
       enable = true;
       description = "Issue/Renew certificate for ${cfg.domain}";
