@@ -34,7 +34,7 @@ in {
     };
     services.private-storage-issuer.issuer = lib.mkOption {
       default = "Ristretto";
-      type = lib.types.enum [ " Trivial" "Ristretto" ];
+      type = lib.types.enum [ "Trivial" "Ristretto" ];
       example = lib.literalExample "Trivial";
       description = ''
         The issuer algorithm to use.  Either Trivial for a fake no-crypto
