@@ -145,8 +145,6 @@ in {
           ${pkgs.certbot}/bin/certbot register ${configArgs} --agree-tos -m ${cfg.letsEncryptAdminEmail} || true
           # Obtain the certificate.
           ${pkgs.certbot}/bin/certbot certonly ${configArgs} -n --standalone --domains ${cfg.domain}
-          # Restart the server so the new certificate gets used.
-          systemctl restart zkapissuer.service
           '';
       };
     };
