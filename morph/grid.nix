@@ -17,7 +17,7 @@ import ./make-grid.nix {
     # doesn't specify one.
     #
     # The names must be unique!
-    "issuer" = import ./issuer.nix ({
+    "payments.privatestorage.io" = import ./issuer.nix ({
       hardware = ./issuer-aws.nix;
       stateVersion = "19.03";
     } // cfg);
