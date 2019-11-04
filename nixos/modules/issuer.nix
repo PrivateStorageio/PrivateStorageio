@@ -134,7 +134,6 @@ in {
     systemd.services."cert-${cfg.domain}" = {
       enable = true;
       description = "Issue/Renew certificate for ${cfg.domain}";
-      wantedBy = [ "zkapissuer.service" ];
       serviceConfig = {
         ExecStart =
         let
