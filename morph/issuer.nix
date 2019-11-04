@@ -1,5 +1,7 @@
 { hardware
 , ristrettoSigningKeyPath
+, issuerDomain
+, letsEncryptAdminEmail
 , stateVersion
 , ...
 }: {
@@ -27,6 +29,8 @@
     ristrettoSigningKey = builtins.readFile (./.. + ristrettoSigningKeyPath);
     database = "SQLite3";
     databasePath = "/var/db/vouchers.sqlite3";
+    inherit letsEncryptAdminEmail;
+    domain = issuerDomain;
   };
 
   system.stateVersion = stateVersion;

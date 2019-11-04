@@ -64,11 +64,18 @@ in {
         type is being used.
       '';
     };
+    services.private-storage-issuer.letsEncryptAdminEmail = lib.mkOption {
+      type = lib.types.str;
+      description = ''
+        An email address to give to Let's Encrypt as an operational contact
+        for the service's TLS certificate.
+      '';
+    };
   };
 
   config =
     let
-      acme = "/var/lib/acme";
+      certroot = "/var/lib/letsencrypt/live";
     in lib.mkIf cfg.enable {
     # Add a systemd service to run PaymentServer.
     systemd.services.zkapissuer = {
@@ -80,8 +87,8 @@ in {
         # interfaces.
         "network.target"
       ];
-      # Make sure we at least have a self-signed certificate.
-      requires = lib.optional cfg.tls "acme-selfsigned-${cfg.domain}.service";
+      # Make sure we at least have a certificate.
+      requires = lib.optional cfg.tls "cert-${cfg.domain}";
 
       serviceConfig = {
         ExecStart =
@@ -100,12 +107,9 @@ in {
               if cfg.tls
               then
                 "--https-port 443 " +
-                # acme has plugins to write the files in different ways but the
-                # self-signed certificate generator doesn't.  The files it
-                # writes are weirdly named and shaped but they work.
-                "--https-certificate-path ${acme}/${cfg.domain}/full.pem " +
-                "--https-certificate-chain-path ${acme}/${cfg.domain}/fullchain.pem " +
-                "--https-key-path ${acme}/${cfg.domain}/key.pem"
+                "--https-certificate-path ${certroot}/${cfg.domain}/cert.pem " +
+                "--https-certificate-chain-path ${certroot}/${cfg.domain}/chain.pem " +
+                "--https-key-path ${certroot}/${cfg.domain}/privkey.pem"
               else
                 # Only for automated testing.
                 "--http-port 80";
@@ -121,25 +125,30 @@ in {
 
     # Certificate renewal.  Note that preliminarySelfsigned only creates the
     # service.  We must declare that we *require* it in our service above.
-    security.acme = if cfg.tls
-      then {
-        production = false;
-        preliminarySelfsigned = true;
-        certs."${cfg.domain}" = {
-          email = "jean-paul@privatestorage.io";
-          postRun = "systemctl restart zkapissuer.service";
-          webroot = "${acme}/acme-challenges";
-          plugins = [ "account_key.json" "full.pem" "fullchain.pem" "key.pem" ];
-        };
-      }
-      else {};
-
-    services.nginx.virtualHosts = if cfg.tls
-      then {
-        "${cfg.domain}" = {
-          locations."/" = "${acme}/acme-challenges";
-        };
-      }
-      else {};
+    systemd.services."cert-${cfg.domain}" = {
+      enable = true;
+      description = "Issue/Renew certificate for ${cfg.domain}";
+      wantedBy = [ "zkapissuer.service" ];
+      serviceConfig = {
+        ExecStart =
+        let
+          configArgs = "--config-dir /var/lib/letsencrypt --work-dir /var/run/letsencrypt --logs-dir /var/run/log/letsencrypt";
+        in
+          pkgs.writeScript "cert-${cfg.domain}-start.sh" ''
+          #!${pkgs.runtimeShell} -e
+          # Register if necessary.
+          ${pkgs.certbot}/bin/certbot register ${configArgs} --agree-tos -m ${cfg.letsEncryptAdminEmail} || true
+          # Obtain the certificate.
+          ${pkgs.certbot}/bin/certbot certonly ${configArgs} -n --standalone --domains ${cfg.domain}
+          # Restart the server so the new certificate gets used.
+          systemctl restart zkapissuer.service
+          '';
+      };
+    };
+    # Open 80 and 443 for the certbot HTTP server and the PaymentServer HTTPS server.
+    networking.firewall.allowedTCPPorts = [
+      80
+      443
+    ];
   };
 }

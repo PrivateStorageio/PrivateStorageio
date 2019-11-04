@@ -1,4 +1,4 @@
-{ publicIPv4, publicStoragePort, ristrettoSigningKeyPath }: rec {
+{ publicIPv4, publicStoragePort, ristrettoSigningKeyPath, ... }: rec {
 
   deployment = {
     secrets = {

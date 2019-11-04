@@ -3,8 +3,14 @@
 # with the production grid and have one fewer possible point of divergence.
 import ./make-grid.nix {
   name = "Testing";
+  config = ./testing-grid.config.json;
   nodes = cfg: {
-    "testing000" = import ./testing000.nix (cfg // {
+    "payments.privatestorage-staging.com" = import ./issuer.nix ({
+      hardware = ./issuer-aws.nix;
+      stateVersion = "19.03";
+    } // cfg);
+
+    "35.157.216.200" = import ./testing000.nix (cfg // {
       publicIPv4 = "35.157.216.200";
     });
   };
