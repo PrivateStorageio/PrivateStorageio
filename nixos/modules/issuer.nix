@@ -82,13 +82,19 @@ in {
       enable = true;
       description = "ZKAP Issuer";
       wantedBy = [ "multi-user.target" ];
+
+      # Make sure we have a certificate the first time, if we are running over
+      # TLS and require a certificate.
+      requires = lib.optional cfg.tls "cert-${cfg.domain}";
+
       after = [
         # Make sure there is a network so we can bind to all of the
         # interfaces.
         "network.target"
-      ];
-      # Make sure we at least have a certificate.
-      requires = lib.optional cfg.tls "cert-${cfg.domain}";
+      ] ++
+        # Make sure we run after the certificate is issued, if we are running
+        # over TLS and require a certificate.
+        lib.optional cfg.tls "cert-${cfg.domain}";
 
       serviceConfig = {
         ExecStart =
