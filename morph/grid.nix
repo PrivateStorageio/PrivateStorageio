@@ -3,6 +3,7 @@
 # with the testing grid and have one fewer possible point of divergence.
 import ./make-grid.nix {
   name = "Production";
+  config = ./grid.config.json;
   nodes = cfg: {
     # Here are the hosts that are in this morph network.  This is sort of like
     # a server manifest.  We try to keep as many of the specific details as
@@ -16,6 +17,11 @@ import ./make-grid.nix {
     # doesn't specify one.
     #
     # The names must be unique!
+    "payments.privatestorage.io" = import ./issuer.nix ({
+      hardware = ./issuer-aws.nix;
+      stateVersion = "19.03";
+    } // cfg);
+
     "storage001" = import ./make-storage.nix ({
         cfg = import ./storage001-config.nix;
         hardware = ./storage001-hardware.nix;

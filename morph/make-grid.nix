@@ -3,11 +3,11 @@
 # and a function that takes the grid configuration as an argument and returns
 # a set of nodes specifying the addresses and NixOS configurations for each
 # server in the morph network.
-{ name, nodes }:
+{ name, config, nodes }:
 let
   pkgs = import <nixpkgs> { };
   # Load our JSON configuration for later use.
-  cfg = pkgs.lib.trivial.importJSON ./grid.config.json;
+  cfg = pkgs.lib.trivial.importJSON config;
 in
 {
   network =  {

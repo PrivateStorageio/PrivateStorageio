@@ -13,15 +13,19 @@ from time import sleep
 
 def main():
     clientAPIRoot, issuerAPIRoot = argv[1:]
+    if not clientAPIRoot.endswith("/"):
+        clientAPIRoot += "/"
+    if not issuerAPIRoot.endswith("/"):
+        issuerAPIRoot += "/"
 
     # Construct a voucher that's acceptable to various parts of the system.
     voucher = "a" * 44
 
-    zkapauthz = clientAPIRoot + "/storage-plugins/privatestorageio-zkapauthz-v1"
+    zkapauthz = clientAPIRoot + "storage-plugins/privatestorageio-zkapauthz-v1"
 
     # Simulate a payment for a voucher.
     post(
-        issuerAPIRoot + "/v1/stripe/webhook",
+        issuerAPIRoot + "v1/stripe/webhook",
         dumps(charge_succeeded_json(voucher)),
         headers={"content-type": "application/json"},
     )
