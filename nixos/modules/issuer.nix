@@ -85,7 +85,7 @@ in {
 
       # Make sure we have a certificate the first time, if we are running over
       # TLS and require a certificate.
-      requires = lib.optional cfg.tls "cert-${cfg.domain}";
+      requires = lib.optional cfg.tls "cert-${cfg.domain}.service";
 
       after = [
         # Make sure there is a network so we can bind to all of the
@@ -94,7 +94,7 @@ in {
       ] ++
         # Make sure we run after the certificate is issued, if we are running
         # over TLS and require a certificate.
-        lib.optional cfg.tls "cert-${cfg.domain}";
+        lib.optional cfg.tls "cert-${cfg.domain}.service";
 
       # It really shouldn't ever exit on its own!  If it does, it's a bug
       # we'll have to fix.  Restart it and hope it doesn't happen too much
