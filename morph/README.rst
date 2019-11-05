@@ -43,10 +43,42 @@ Each such file contains a minimal Nix expression supplying critical system confi
 "Critical" roughly corresponds to anything which must be specified to have a bootable system.
 These files are referenced by the corresponding ``<hostname>.nix`` files.
 
-<hostname>.nix
---------------
+Configuring New Storage Nodes
+-----------------------------
 
-Each such file contains the parts of the system configuration that aren't *so* related to hardware.
-They are referenced from ``grid.nix``.
+Storage nodes are brought into the grid in a multi-step process.
+Here are the steps to configure a new node,
+starting from a minimal NixOS 19.03 or 19.09 installation.
+
+#. Copy ``/etc/nixos/hardware-configuration.nix`` to ``storageNNN-hardware.nix``.
+   In the case of an EC2 instance, copy ``/etc/nixos/configuration.nix`` instead.
+#. Add ``"zfs"`` to ``boot.supportedFilesystems`` in ``storageNNN-hardware.nix``.
+#. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
+#. Add an entry for the new host to ``grid.nix`` referencing the new files.
+#. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot``.
+   There will likely be some errors from ZFS-related systemd units which cannot yet succeed because the kernel lacks ZFS support.
+#. Log on to the new host and reboot it.
+#. Log on to the new host and manually create a storage zpool::
+
+     zpool create -m legacy -o ashift=12 root raidz /dev/disk/by-id/{...}
+
+#. Mount the new ZFS filesystem to verify it is working::
+
+     mkdir /storage
+     mount -t zfs root /storage
+
+#. Add a new filesystem entry to ``storageNNN-hardware.nix``::
+
+     # Manually created using:
+     #   zpool create -f -m legacy -o ashift=12 root raidz ...
+     fileSystems."/storage" = {
+       device = "root";
+       fsType = "zfs";
+     };
+
+#. Deploy the new configuration to the host::
+
+     morph deploy morph/grid.nix --on <identifier> switch --reboot
+
 
 .. _`morph`: https://github.com/DBCDK/morph
