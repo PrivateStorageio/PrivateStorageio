@@ -1,4 +1,4 @@
-{ publicIPv4, hardware, publicStoragePort, ristrettoSigningKeyPath, ... }: rec {
+{ publicIPv4, hardware, publicStoragePort, ristrettoSigningKeyPath, stateVersion, ... }: rec {
 
   deployment = {
     secrets = {
@@ -27,4 +27,6 @@
     inherit publicStoragePort;
     ristrettoSigningKeyPath = deployment.secrets.ristretto-signing-key.destination;
   };
+
+  system.stateVersion = stateVersion;
 }
