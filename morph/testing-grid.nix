@@ -10,8 +10,8 @@ import ./make-grid.nix {
       stateVersion = "19.03";
     } // cfg);
 
-    "35.157.216.200" = import ./testing000.nix (cfg // {
-      publicIPv4 = "35.157.216.200";
+    "3.120.26.190" = import ./testing000.nix (cfg // {
+      publicIPv4 = "3.120.26.190";
     });
   };
 }
