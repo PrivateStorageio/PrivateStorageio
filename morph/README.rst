@@ -56,6 +56,7 @@ starting from a minimal NixOS 19.03 or 19.09 installation.
 #. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
 #. Add an entry for the new host to ``grid.nix`` referencing the new files.
 #. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot``.
+   There will likely be some errors from ZFS-related systemd units which cannot yet succeed because the kernel lacks ZFS support.
 #. Log on to the new host and reboot it.
 #. Log on to the new host and manually create a storage zpool::
 
