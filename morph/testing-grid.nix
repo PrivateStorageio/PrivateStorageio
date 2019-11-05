@@ -10,8 +10,9 @@ import ./make-grid.nix {
       stateVersion = "19.03";
     } // cfg);
 
-    "3.120.26.190" = import ./testing000.nix (cfg // {
+    "3.120.26.190" = import ./make-testing.nix (cfg // {
       publicIPv4 = "3.120.26.190";
+      hardware = ./testing001-hardware.nix;
     });
   };
 }

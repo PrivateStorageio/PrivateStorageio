@@ -43,10 +43,17 @@ Each such file contains a minimal Nix expression supplying critical system confi
 "Critical" roughly corresponds to anything which must be specified to have a bootable system.
 These files are referenced by the corresponding ``<hostname>.nix`` files.
 
-<hostname>.nix
---------------
+Configuring New Storage Nodes
+-----------------------------
 
-Each such file contains the parts of the system configuration that aren't *so* related to hardware.
-They are referenced from ``grid.nix``.
+Storage nodes are brought into the grid in a multi-step process.
+Here are the steps to configure a new node,
+starting from a minimal NixOS 19.03 or 19.09 installation.
+
+#. Copy ``/etc/nixos/hardware-configuration.nix`` to ``storageNNN-hardware.nix``.
+   In the case of an EC2 instance, copy ``/etc/nixos/configuration.nix`` instead.
+#. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
+#. Add an entry for the new host to ``grid.nix`` referencing the new files.
+
 
 .. _`morph`: https://github.com/DBCDK/morph

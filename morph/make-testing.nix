@@ -1,4 +1,4 @@
-{ publicIPv4, publicStoragePort, ristrettoSigningKeyPath, ... }: rec {
+{ publicIPv4, hardware, publicStoragePort, ristrettoSigningKeyPath, ... }: rec {
 
   deployment = {
     secrets = {
@@ -17,7 +17,7 @@
   };
 
   imports = [
-    ./testing000-hardware.nix
+    hardware
     ../nixos/modules/private-storage.nix
   ];
 
