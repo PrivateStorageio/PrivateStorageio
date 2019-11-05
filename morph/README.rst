@@ -55,6 +55,29 @@ starting from a minimal NixOS 19.03 or 19.09 installation.
 #. Add ``"zfs"`` to ``boot.supportedFilesystems`` in ``storageNNN-hardware.nix``.
 #. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
 #. Add an entry for the new host to ``grid.nix`` referencing the new files.
+#. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot``.
+#. Log on to the new host and reboot it.
+#. Log on to the new host and manually create a storage zpool::
+
+     zpool create -m legacy -o ashift=12 root raidz /dev/disk/by-id/{...}
+
+#. Mount the new ZFS filesystem to verify it is working::
+
+     mkdir /storage
+     mount -t zfs root /storage
+
+#. Add a new filesystem entry to ``storageNNN-hardware.nix``::
+
+     # Manually created using:
+     #   zpool create -f -m legacy -o ashift=12 root raidz ...
+     fileSystems."/storage" = {
+       device = "root";
+       fsType = "zfs";
+     };
+
+#. Deploy the new configuration to the host::
+
+     morph deploy morph/grid.nix --on <identifier> switch --reboot
 
 
 .. _`morph`: https://github.com/DBCDK/morph
