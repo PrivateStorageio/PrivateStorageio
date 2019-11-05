@@ -141,9 +141,9 @@ in {
           pkgs.writeScript "cert-${cfg.domain}-start.sh" ''
           #!${pkgs.runtimeShell} -e
           # Register if necessary.
-          ${pkgs.certbot}/bin/certbot register ${configArgs} --agree-tos -m ${cfg.letsEncryptAdminEmail} || true
+          ${pkgs.certbot}/bin/certbot register ${configArgs} --non-interactive --agree-tos -m ${cfg.letsEncryptAdminEmail} || true
           # Obtain the certificate.
-          ${pkgs.certbot}/bin/certbot certonly ${configArgs} -n --standalone --domains ${cfg.domain}
+          ${pkgs.certbot}/bin/certbot certonly ${configArgs} --non-interactive --standalone --domains ${cfg.domain}
           '';
       };
     };
