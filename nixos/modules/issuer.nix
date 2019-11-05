@@ -96,37 +96,36 @@ in {
         # over TLS and require a certificate.
         lib.optional cfg.tls "cert-${cfg.domain}";
 
-      serviceConfig = {
-        ExecStart =
-          let
-            # Compute the right command line arguments to pass to it.  The
-            # signing key is only supplied when using the Ristretto issuer.
-            issuerArgs =
-              if cfg.issuer == "Trivial"
-                then "--issuer Trivial"
-                else "--issuer Ristretto --signing-key ${cfg.ristrettoSigningKey}";
-            databaseArgs =
-              if cfg.database == "Memory"
-                then "--database Memory"
-                else "--database SQLite3 --database-path ${cfg.databasePath}";
-            httpsArgs =
-              if cfg.tls
-              then
-                "--https-port 443 " +
-                "--https-certificate-path ${certroot}/${cfg.domain}/cert.pem " +
-                "--https-certificate-chain-path ${certroot}/${cfg.domain}/chain.pem " +
-                "--https-key-path ${certroot}/${cfg.domain}/privkey.pem"
-              else
-                # Only for automated testing.
-                "--http-port 80";
-          in
-            "${cfg.package}/bin/PaymentServer-exe ${issuerArgs} ${databaseArgs} ${httpsArgs}";
-        Type = "simple";
-        # It really shouldn't ever exit on its own!  If it does, it's a bug
-        # we'll have to fix.  Restart it and hope it doesn't happen too much
-        # before we can fix whatever the issue is.
-        Restart = "always";
-      };
+      # It really shouldn't ever exit on its own!  If it does, it's a bug
+      # we'll have to fix.  Restart it and hope it doesn't happen too much
+      # before we can fix whatever the issue is.
+      serviceConfig.Restart = "always";
+      serviceConfig.Type = "simple";
+
+      script =
+        let
+          # Compute the right command line arguments to pass to it.  The
+          # signing key is only supplied when using the Ristretto issuer.
+          issuerArgs =
+            if cfg.issuer == "Trivial"
+              then "--issuer Trivial"
+              else "--issuer Ristretto --signing-key ${cfg.ristrettoSigningKey}";
+          databaseArgs =
+            if cfg.database == "Memory"
+              then "--database Memory"
+              else "--database SQLite3 --database-path ${cfg.databasePath}";
+          httpsArgs =
+            if cfg.tls
+            then
+              "--https-port 443 " +
+              "--https-certificate-path ${certroot}/${cfg.domain}/cert.pem " +
+              "--https-certificate-chain-path ${certroot}/${cfg.domain}/chain.pem " +
+              "--https-key-path ${certroot}/${cfg.domain}/privkey.pem"
+            else
+              # Only for automated testing.
+              "--http-port 80";
+        in
+          "${cfg.package}/bin/PaymentServer-exe ${issuerArgs} ${databaseArgs} ${httpsArgs}";
     };
 
     # Certificate renewal.  We must declare that we *require* it in our
