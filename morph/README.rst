@@ -52,6 +52,7 @@ starting from a minimal NixOS 19.03 or 19.09 installation.
 
 #. Copy ``/etc/nixos/hardware-configuration.nix`` to ``storageNNN-hardware.nix``.
    In the case of an EC2 instance, copy ``/etc/nixos/configuration.nix`` instead.
+#. Add ``"zfs"`` to ``boot.supportedFilesystems`` in ``storageNNN-hardware.nix``.
 #. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
 #. Add an entry for the new host to ``grid.nix`` referencing the new files.
 
