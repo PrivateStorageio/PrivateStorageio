@@ -18,6 +18,13 @@
       fsType = "ext4";
     };
 
+  # Manually created using:
+  #   zpool create -m legacy -o ashift=12 root raidz /dev/disk/by-id/{wwn-0x5000cca25dcc966d,wwn-0x5000cca24cec02e3,wwn-0x5000cca25dcc7711,wwn-0x5000cca25dccca63,wwn-0x5000cca25dcc74b6,wwn-0x5000cca25dcc4591,wwn-0x5000cca25dcc4461}
+  fileSystems."/storage" = {
+    device = "root";
+    fsType = "zfs";
+  };
+
   swapDevices = [ ];
 
   nix.maxJobs = lib.mkDefault 24;
