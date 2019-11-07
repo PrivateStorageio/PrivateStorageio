@@ -76,12 +76,6 @@ starting from a minimal NixOS 19.03 or 19.09 installation.
 
 #. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
 #. Add an entry for the new host to ``grid.nix`` referencing the new files.
-#. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot``.
-#. Log on to the new host and reboot it.
-
-#. Deploy the new configuration to the host::
-
-     morph deploy morph/grid.nix --on <identifier> switch --reboot
-
+#. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot --upload-secrets --reboot``.
 
 .. _`morph`: https://github.com/DBCDK/morph
