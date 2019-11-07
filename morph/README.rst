@@ -50,15 +50,13 @@ Storage nodes are brought into the grid in a multi-step process.
 Here are the steps to configure a new node,
 starting from a minimal NixOS 19.03 or 19.09 installation.
 
-#. Copy ``/etc/nixos/hardware-configuration.nix`` to ``storageNNN-hardware.nix``.
-   In the case of an EC2 instance, copy ``/etc/nixos/configuration.nix`` instead.
+#. Copy the remote file ``/etc/nixos/hardware-configuration.nix`` to the local file ``storageNNN-hardware.nix``.
+   In the case of an EC2 instance, copy the remote file ``/etc/nixos/configuration.nix`` instead.
 #. Add ``"zfs"`` to ``boot.supportedFilesystems`` in ``storageNNN-hardware.nix``.
-#. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
-#. Add an entry for the new host to ``grid.nix`` referencing the new files.
-#. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot``.
-   There will likely be some errors from ZFS-related systemd units which cannot yet succeed because the kernel lacks ZFS support.
-#. Log on to the new host and reboot it.
-#. Log on to the new host and manually create a storage zpool::
+#. Add a unique value for ``networking.hostId`` in ``storageNNN-hardware.nix``.
+#. Copy ``storageNNN-hardware.nix`` back to ``/etc/nixos/hardware-configuration.nix``.
+#. Run ``nixos-rebuild test``.
+#. Manually create a storage zpool::
 
      zpool create -m legacy -o ashift=12 root raidz /dev/disk/by-id/{...}
 
@@ -75,6 +73,11 @@ starting from a minimal NixOS 19.03 or 19.09 installation.
        device = "root";
        fsType = "zfs";
      };
+
+#. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
+#. Add an entry for the new host to ``grid.nix`` referencing the new files.
+#. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot``.
+#. Log on to the new host and reboot it.
 
 #. Deploy the new configuration to the host::
 
