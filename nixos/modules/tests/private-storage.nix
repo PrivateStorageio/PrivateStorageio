@@ -17,6 +17,9 @@ let
   # world at large.
   ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
 
+  # Ugh.
+  stripeSecretKey = "sk_test_blubblub";
+
   # Here are the preconstructed secrets which we can assign to the introducer.
   # This is a lot easier than having the introducer generate them and then
   # discovering and configuring the other nodes with them.
@@ -85,6 +88,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         tls = false;
         issuer = "Ristretto";
         inherit ristrettoSigningKey;
+        stripeSecretKeyPath = pkgs.writeText "stripe.secret" stripeSecretKey;
+        letsEncryptAdminEmail = "user@example.invalid";
       };
     } // networkConfig;
   };
