@@ -14,7 +14,7 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/9721366a-7f75-45b6-908a-cde68ed82295";
+    { device = "/dev/disk/by-uuid/0e92ada9-effb-42e2-a26a-9cdb529bcdc7";
       fsType = "ext4";
     };
 
@@ -25,7 +25,14 @@
     fsType = "zfs";
   };
 
-  swapDevices = [ ];
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/50b73d78-12cd-4599-a774-57af14e6d9f7";
+      fsType = "ext4";
+    };
+
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/f762b5e2-bbdd-4a02-bbd9-0bf6b11e0ab5"; }
+    ];
 
   nix.maxJobs = lib.mkDefault 24;
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
