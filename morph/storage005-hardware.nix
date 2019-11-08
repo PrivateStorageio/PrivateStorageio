@@ -14,18 +14,23 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/29d379b9-a3e2-4efd-8ac1-d55bb5751dc2";
+    { device = "/dev/disk/by-uuid/2653c6bb-396f-4911-b9ff-b68de8f9715d";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/C95C-B700";
-      fsType = "vfat";
+    { device = "/dev/disk/by-uuid/68edb827-6750-483d-891e-462333f2dbc1";
+      fsType = "ext4";
     };
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/4800c196-ee81-43ea-8e48-ae7e222524de"; }
-    ];
+  # Manually created using:
+  #   zpool create -m legacy -o ashift=12 root raidz /dev/disk/by-id/{wwn-0x5000cca25dcc7721,wwn-0x5000cca25dcb2ebe,wwn-0x5000cca25dcb1184,scsi-35000cca25dcca2bd,wwn-0x5000cca244c977af,wwn-0x5000cca244c97e6e,wwn-0x5000cca25cc0a136}
+  fileSystems."/storage" = {
+    device = "root";
+    fsType = "zfs";
+  };
+
+  swapDevices = [ ];
 
   nix.maxJobs = lib.mkDefault 32;
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
