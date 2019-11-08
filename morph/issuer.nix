@@ -1,5 +1,6 @@
 { hardware
 , ristrettoSigningKeyPath
+, stripeSecretKeyPath
 , issuerDomain
 , letsEncryptAdminEmail
 , stateVersion
@@ -27,6 +28,7 @@
     enable = true;
     # XXX This should be passed as a path.
     ristrettoSigningKey = builtins.readFile (./.. + ristrettoSigningKeyPath);
+    stripeSecretKeyPath = ./.. + stripeSecretKeyPath;
     database = "SQLite3";
     databasePath = "/var/db/vouchers.sqlite3";
     inherit letsEncryptAdminEmail;

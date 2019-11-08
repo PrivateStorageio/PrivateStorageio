@@ -1,5 +1,6 @@
 { "publicStoragePort": 8898
 , "ristrettoSigningKeyPath": "../../PrivateStorageSecrets/ristretto.signing-key"
+, "stripeSecretKeyPath": "../../PrivateStorageSecrets/stripe.secret"
 , "issuerDomain": "payments.privatestorage.io"
 , "letsEncryptAdminEmail": "jean-paul@privatestorage.io"
 }

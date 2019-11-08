@@ -49,6 +49,13 @@ in {
         ``Ristretto``.
       '';
     };
+    services.private-storage-issuer.stripeSecretKeyPath = lib.mkOption {
+      type = lib.types.path;
+      description = ''
+        The path to a file containing a Stripe secret key to use for charge
+        and payment management.
+      '';
+    };
     services.private-storage-issuer.database = lib.mkOption {
       default = "Memory";
       type = lib.types.enum [ "Memory" "SQLite3" ];
@@ -124,8 +131,9 @@ in {
             else
               # Only for automated testing.
               "--http-port 80";
+          stripeArgs = "--stripe-key ${builtins.readFile cfg.stripeSecretKeyPath}";
         in
-          "${cfg.package}/bin/PaymentServer-exe ${issuerArgs} ${databaseArgs} ${httpsArgs}";
+          "${cfg.package}/bin/PaymentServer-exe ${issuerArgs} ${databaseArgs} ${httpsArgs} ${stripeArgs}";
     };
 
     # Certificate renewal.  We must declare that we *require* it in our
