@@ -4,7 +4,8 @@
 , "issuerDomain": "payments.privatestorage-staging.com"
 , "letsEncryptAdminEmail": "jean-paul@privatestorage.io"
 , "allowedChargeOrigins": [
-    "https://privatestorage.io"
-  , "https://www.privatestorage.io"
+    "http://localhost:5000"
+  , "https://privatestorage-staging.com"
+  , "https://www.privatestorage-staging.com"
   ]
 }
