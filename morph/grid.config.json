@@ -3,4 +3,9 @@
 , "stripeSecretKeyPath": "../../PrivateStorageSecrets/stripe.secret"
 , "issuerDomain": "payments.privatestorage.io"
 , "letsEncryptAdminEmail": "jean-paul@privatestorage.io"
+, "allowedChargeOrigins": [
+    "http://localhost:5000"
+  , "https://privatestorage-staging.com"
+  , "https://www.privatestorage-staging.com"
+  ]
 }

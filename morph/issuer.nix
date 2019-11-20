@@ -3,6 +3,7 @@
 , stripeSecretKeyPath
 , issuerDomain
 , letsEncryptAdminEmail
+, allowedChargeOrigins
 , stateVersion
 , ...
 }: {
@@ -32,6 +33,7 @@
     databasePath = "/var/db/vouchers.sqlite3";
     inherit letsEncryptAdminEmail;
     domain = issuerDomain;
+    inherit allowedChargeOrigins;
   };
 
   system.stateVersion = stateVersion;

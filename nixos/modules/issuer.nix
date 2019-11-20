@@ -78,6 +78,14 @@ in {
         for the service's TLS certificate.
       '';
     };
+    services.private-storage-issuer.allowedChargeOrigins = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      description = ''
+        The CORS "Origin" values which are allowed to submit charges to the
+        payment server.  Note this is not currently enforced by the
+        PaymentServer.  It just controls the CORS headers served.
+      '';
+    };
   };
 
   config =
@@ -131,9 +139,14 @@ in {
             else
               # Only for automated testing.
               "--http-port 80";
-          stripeArgs = "--stripe-key ${builtins.readFile cfg.stripeSecretKeyPath}";
+
+          prefixOption = s: "--allow-origin=" + s;
+          originStrings = map prefixOption cfg.allowedChargeOrigins;
+          originArgs = builtins.concatStringsSep " " originStrings;
+
+          stripeArgs = "--stripe-key-path ${cfg.stripeSecretKeyPath}";
         in
-          "${cfg.package}/bin/PaymentServer-exe ${issuerArgs} ${databaseArgs} ${httpsArgs} ${stripeArgs}";
+          "${cfg.package}/bin/PaymentServer-exe ${originArgs} ${issuerArgs} ${databaseArgs} ${httpsArgs} ${stripeArgs}";
     };
 
     # Certificate renewal.  We must declare that we *require* it in our
