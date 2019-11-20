@@ -26,8 +26,7 @@
 
   services.private-storage-issuer = {
     enable = true;
-    # XXX This should be passed as a path.
-    ristrettoSigningKey = builtins.readFile (./.. + ristrettoSigningKeyPath);
+    ristrettoSigningKeyPath = ./.. + ristrettoSigningKeyPath;
     stripeSecretKeyPath = ./.. + stripeSecretKeyPath;
     database = "SQLite3";
     databasePath = "/var/db/vouchers.sqlite3";

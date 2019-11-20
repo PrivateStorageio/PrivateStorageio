@@ -41,12 +41,12 @@ in {
         algorithm or Ristretto for Ristretto-flavored PrivacyPass.
       '';
     };
-    services.private-storage-issuer.ristrettoSigningKey = lib.mkOption {
+    services.private-storage-issuer.ristrettoSigningKeyPath = lib.mkOption {
       default = null;
-      type = lib.types.str;
+      type = lib.types.path;
       description = ''
-        The Ristretto signing key to use.  Required if the issuer is
-        ``Ristretto``.
+        The path to a file containing the Ristretto signing key to use.
+        Required if the issuer is ``Ristretto``.
       '';
     };
     services.private-storage-issuer.stripeSecretKeyPath = lib.mkOption {
@@ -116,7 +116,7 @@ in {
           issuerArgs =
             if cfg.issuer == "Trivial"
               then "--issuer Trivial"
-              else "--issuer Ristretto --signing-key ${cfg.ristrettoSigningKey}";
+              else "--issuer Ristretto --signing-key-path ${cfg.ristrettoSigningKeyPath}";
           databaseArgs =
             if cfg.database == "Memory"
               then "--database Memory"
