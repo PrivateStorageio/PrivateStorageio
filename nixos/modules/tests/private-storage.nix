@@ -22,10 +22,20 @@ let
   # The issuer's signing key.  Notionally, this is a secret key.  This is only
   # the value for this system test though so I don't care if it leaks to the
   # world at large.
-  ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
+  ristrettoSigningKeyPath =
+    let
+      key = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
+      basename = "signing-key.private";
+    in
+      pkgs.writeText basename key;
 
-  # Ugh.
-  stripeSecretKey = "sk_test_blubblub";
+  stripeSecretKeyPath =
+    let
+      # Ugh.
+      key = "sk_test_blubblub";
+      basename = "stripe.secret";
+    in
+      pkgs.writeText basename key;
 
   # Here are the preconstructed secrets which we can assign to the introducer.
   # This is a lot easier than having the introducer generate them and then
@@ -112,9 +122,11 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         domain = "issuer";
         tls = false;
         issuer = "Ristretto";
-        inherit ristrettoSigningKey;
-        stripeSecretKeyPath = pkgs.writeText "stripe.secret" stripeSecretKey;
+        inherit ristrettoSigningKeyPath;
         letsEncryptAdminEmail = "user@example.invalid";
+        allowedChargeOrigins = [ "http://unused.invalid" ];
+
+        inherit stripeSecretKeyPath;
         stripeEndpointDomain = "api_stripe_com";
         stripeEndpointScheme = "HTTP";
         stripeEndpointPort = 80;
