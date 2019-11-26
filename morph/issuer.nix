@@ -27,6 +27,7 @@
 
   services.private-storage-issuer = {
     enable = true;
+    tls = true;
     ristrettoSigningKeyPath = ./.. + ristrettoSigningKeyPath;
     stripeSecretKeyPath = ./.. + stripeSecretKeyPath;
     database = "SQLite3";
