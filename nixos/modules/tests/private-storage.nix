@@ -9,8 +9,15 @@ let
   get-passes = ./get-passes.py;
   exercise-storage = ./exercise-storage.py;
 
+  # This is a test double of the Stripe API server.  It is extremely simple.
+  # It barely knows how to respond to exactly the API endpoints we use,
+  # exactly how we use them.
+  stripe-api-double = ./stripe-api-double.py;
+
   # The root URL of the Ristretto-flavored PrivacyPass issuer API.
   issuerURL = "http://issuer/";
+
+  voucher = "xyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxy";
 
   # The issuer's signing key.  Notionally, this is a secret key.  This is only
   # the value for this system test though so I don't care if it leaks to the
@@ -42,6 +49,22 @@ let
     networking.firewall.enable = false;
     networking.dhcpcd.enable = false;
   };
+
+  # Return a Perl program fragment to run a shell command on one of the nodes.
+  # The first argument is the name of the node.  The second is a list of the
+  # argv to run.
+  #
+  # The program's output is piped to systemd-cat and the Perl fragment
+  # evaluates to success if the command exits with a success status.
+  runOnNode = node: argv:
+    let
+      command = builtins.concatStringsSep " " argv;
+    in
+      "
+      \$${node}->succeed('set -eo pipefail; ${command} | systemd-cat');
+      # succeed() is not success but 1 is.
+      1;
+      ";
 in
 # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
 import <nixpkgs/nixos/tests/make-test.nix> {
@@ -69,11 +92,13 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       { imports =
         [ ../private-storage.nix
         ];
-        services.private-storage.enable = true;
-        services.private-storage.publicIPv4 = "storage";
-        services.private-storage.introducerFURL = introducerFURL;
-        services.private-storage.issuerRootURL = issuerURL;
-        services.private-storage.ristrettoSigningKeyPath = pkgs.writeText "signing-key.private" ristrettoSigningKey;
+        services.private-storage = {
+          enable = true;
+          publicIPv4 = "storage";
+          introducerFURL = introducerFURL;
+          issuerRootURL = issuerURL;
+          inherit ristrettoSigningKeyPath;
+        };
       } // networkConfig;
 
     # Operate an issuer as well.
@@ -90,8 +115,28 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         inherit ristrettoSigningKey;
         stripeSecretKeyPath = pkgs.writeText "stripe.secret" stripeSecretKey;
         letsEncryptAdminEmail = "user@example.invalid";
+        stripeEndpointDomain = "api_stripe_com";
+        stripeEndpointScheme = "HTTP";
+        stripeEndpointPort = 80;
       };
     } // networkConfig;
+
+    "api_stripe_com" =
+    { config, pkgs, ... }:
+      let python = pkgs.python3.withPackages (ps: [ ps.twisted ]);
+      in networkConfig // {
+        environment.systemPackages = [
+          python
+          pkgs.curl
+        ];
+
+        systemd.services."api.stripe.com" = {
+          enable = true;
+          wantedBy = [ "multi-user.target" ];
+          after = [ "network.target" ];
+          script = "${python}/bin/python ${stripe-api-double} tcp:80";
+        };
+      };
   };
 
   # Test the machines with a Perl program (sobbing).
@@ -107,13 +152,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       );
 
       eval {
-        $introducer->succeed(
-          'set -eo pipefail; ' .
-          '${run-introducer} /tmp/node.pem ${toString introducerPort} ${introducerFURL} | ' .
-          'systemd-cat'
-        );
-        # Signal success. :/
-        1;
+      ${runOnNode "introducer" [ run-introducer "/tmp/node.pem" (toString introducerPort) introducerFURL ]}
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $introducer->execute('cat /tmp/stdout /tmp/stderr');
@@ -142,26 +181,32 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-      $client->succeed('set -eo pipefail; ${run-client} ${introducerFURL} ${issuerURL} | systemd-cat');
+      ${runOnNode "client"  [ run-client introducerFURL issuerURL ]}
       $client->waitForOpenPort(3456);
 
       # Get some ZKAPs from the issuer.
       eval {
-        $client->succeed('set -eo pipefail; ${get-passes} http://127.0.0.1:3456 ${issuerURL} | systemd-cat');
-        # succeed() is not success but 1 is.
+        $api_stripe_com->waitForUnit("api.stripe.com");
         1;
+      } or do {
+        my ($code, $log) = $api_stripe_com->execute('journalctl -u api.stripe.com');
+        $api_stripe_com->log($log);
+        die $@;
+      };
+      eval {
+        ${runOnNode "client" [ get-passes "http://127.0.0.1:3456" issuerURL voucher ]}
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
         $client->log($log);
+        my ($code, $log) = $api_stripe_com->execute('journalctl -u api.stripe.com');
+        $api_stripe_com->log($log);
         die $@;
       };
 
       # The client should be prepped now.  Make it try to use some storage.
       eval {
-        $client->succeed('set -eo pipefail; ${exercise-storage} /tmp/client | systemd-cat');
-        # nothing succeeds like ... 1.
-        1;
+        ${runOnNode "client" [ exercise-storage "/tmp/client" ]}
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');

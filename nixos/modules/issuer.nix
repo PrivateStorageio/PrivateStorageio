@@ -56,6 +56,27 @@ in {
         and payment management.
       '';
     };
+    services.private-storage-issuer.stripeEndpointDomain = lib.mkOption {
+      type = lib.types.str;
+      description = ''
+        The domain name for the Stripe API HTTP endpoint.
+      '';
+      default = "api.stripe.com";
+    };
+    services.private-storage-issuer.stripeEndpointScheme = lib.mkOption {
+      type = lib.types.enum [ "HTTP" "HTTPS" ];
+      description = ''
+        Whether to use HTTP or HTTPS for the Stripe API.
+      '';
+      default = "HTTPS";
+    };
+    services.private-storage-issuer.stripeEndpointPort = lib.mkOption {
+      type = lib.types.int;
+      description = ''
+        The port number for the Stripe API HTTP endpoint.
+      '';
+      default = 443;
+    };
     services.private-storage-issuer.database = lib.mkOption {
       default = "Memory";
       type = lib.types.enum [ "Memory" "SQLite3" ];
@@ -144,7 +165,11 @@ in {
           originStrings = map prefixOption cfg.allowedChargeOrigins;
           originArgs = builtins.concatStringsSep " " originStrings;
 
-          stripeArgs = "--stripe-key-path ${cfg.stripeSecretKeyPath}";
+          stripeArgs =
+            "--stripe-key-path ${cfg.stripeSecretKeyPath} " +
+            "--stripe-endpoint-domain ${cfg.stripeEndpointDomain} " +
+            "--stripe-endpoint-scheme ${cfg.stripeEndpointScheme} " +
+            "--stripe-endpoint-port ${toString cfg.stripeEndpointPort}";
         in
           "${cfg.package}/bin/PaymentServer-exe ${originArgs} ${issuerArgs} ${databaseArgs} ${httpsArgs} ${stripeArgs}";
     };
