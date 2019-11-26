@@ -161,7 +161,7 @@ in {
               # Only for automated testing.
               "--http-port 80";
 
-          prefixOption = s: "--allow-origin=" + s;
+          prefixOption = s: "--cors-origin=" + s;
           originStrings = map prefixOption cfg.allowedChargeOrigins;
           originArgs = builtins.concatStringsSep " " originStrings;
 
