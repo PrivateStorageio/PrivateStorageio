@@ -204,7 +204,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       ${runOnNode "client"  [ run-client introducerFURL issuerURL ]}
       $client->waitForOpenPort(3456);
 
-      # Get some ZKAPs from the issuer.
+      # Make sure the fake Stripe API server is ready for requests.
       eval {
         $api_stripe_com->waitForUnit("api.stripe.com");
         1;
@@ -213,12 +213,17 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         $api_stripe_com->log($log);
         die $@;
       };
+
+      # Get some ZKAPs from the issuer.
       eval {
         ${runOnNode "client" [ get-passes "http://127.0.0.1:3456" issuerURL voucher ]}
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
         $client->log($log);
+
+        # Dump the fake Stripe API server logs, too, since the error may arise
+        # from a PaymentServer/Stripe interaction.
         my ($code, $log) = $api_stripe_com->execute('journalctl -u api.stripe.com');
         $api_stripe_com->log($log);
         die $@;
