@@ -9,16 +9,33 @@ let
   get-passes = ./get-passes.py;
   exercise-storage = ./exercise-storage.py;
 
+  # This is a test double of the Stripe API server.  It is extremely simple.
+  # It barely knows how to respond to exactly the API endpoints we use,
+  # exactly how we use them.
+  stripe-api-double = ./stripe-api-double.py;
+
   # The root URL of the Ristretto-flavored PrivacyPass issuer API.
   issuerURL = "http://issuer/";
+
+  voucher = "xyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxyxy";
 
   # The issuer's signing key.  Notionally, this is a secret key.  This is only
   # the value for this system test though so I don't care if it leaks to the
   # world at large.
-  ristrettoSigningKey = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
+  ristrettoSigningKeyPath =
+    let
+      key = "wumQAfSsJlQKDDSaFN/PZ3EbgBit8roVgfzllfCK2gQ=";
+      basename = "signing-key.private";
+    in
+      pkgs.writeText basename key;
 
-  # Ugh.
-  stripeSecretKey = "sk_test_blubblub";
+  stripeSecretKeyPath =
+    let
+      # Ugh.
+      key = "sk_test_blubblub";
+      basename = "stripe.secret";
+    in
+      pkgs.writeText basename key;
 
   # Here are the preconstructed secrets which we can assign to the introducer.
   # This is a lot easier than having the introducer generate them and then
@@ -42,6 +59,22 @@ let
     networking.firewall.enable = false;
     networking.dhcpcd.enable = false;
   };
+
+  # Return a Perl program fragment to run a shell command on one of the nodes.
+  # The first argument is the name of the node.  The second is a list of the
+  # argv to run.
+  #
+  # The program's output is piped to systemd-cat and the Perl fragment
+  # evaluates to success if the command exits with a success status.
+  runOnNode = node: argv:
+    let
+      command = builtins.concatStringsSep " " argv;
+    in
+      "
+      \$${node}->succeed('set -eo pipefail; ${command} | systemd-cat');
+      # succeed() is not success but 1 is.
+      1;
+      ";
 in
 # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
 import <nixpkgs/nixos/tests/make-test.nix> {
@@ -69,11 +102,13 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       { imports =
         [ ../private-storage.nix
         ];
-        services.private-storage.enable = true;
-        services.private-storage.publicIPv4 = "storage";
-        services.private-storage.introducerFURL = introducerFURL;
-        services.private-storage.issuerRootURL = issuerURL;
-        services.private-storage.ristrettoSigningKeyPath = pkgs.writeText "signing-key.private" ristrettoSigningKey;
+        services.private-storage = {
+          enable = true;
+          publicIPv4 = "storage";
+          introducerFURL = introducerFURL;
+          issuerRootURL = issuerURL;
+          inherit ristrettoSigningKeyPath;
+        };
       } // networkConfig;
 
     # Operate an issuer as well.
@@ -87,11 +122,41 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         domain = "issuer";
         tls = false;
         issuer = "Ristretto";
-        inherit ristrettoSigningKey;
-        stripeSecretKeyPath = pkgs.writeText "stripe.secret" stripeSecretKey;
+        inherit ristrettoSigningKeyPath;
         letsEncryptAdminEmail = "user@example.invalid";
+        allowedChargeOrigins = [ "http://unused.invalid" ];
+
+        inherit stripeSecretKeyPath;
+        stripeEndpointDomain = "api_stripe_com";
+        stripeEndpointScheme = "HTTP";
+        stripeEndpointPort = 80;
       };
     } // networkConfig;
+
+    # Also run a fake Stripe API endpoint server.  Nodes in these tests run on
+    # a network without outside access so we can't easily use the real Stripe
+    # API endpoint and with this one we have greater control over the
+    # behavior, anyway, without all of the unintentional transient network
+    # errors that come from the public internet.  These tests *aren't* meant
+    # to prove PaymentServer correctly interacts with the real Stripe API
+    # server so this is an unverified fake.  The PaymentServer test suite
+    # needs to take care of any actual Stripe API integration testing.
+    "api_stripe_com" =
+    { config, pkgs, ... }:
+      let python = pkgs.python3.withPackages (ps: [ ps.twisted ]);
+      in networkConfig // {
+        environment.systemPackages = [
+          python
+          pkgs.curl
+        ];
+
+        systemd.services."api.stripe.com" = {
+          enable = true;
+          wantedBy = [ "multi-user.target" ];
+          after = [ "network.target" ];
+          script = "${python}/bin/python ${stripe-api-double} tcp:80";
+        };
+      };
   };
 
   # Test the machines with a Perl program (sobbing).
@@ -107,13 +172,7 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       );
 
       eval {
-        $introducer->succeed(
-          'set -eo pipefail; ' .
-          '${run-introducer} /tmp/node.pem ${toString introducerPort} ${introducerFURL} | ' .
-          'systemd-cat'
-        );
-        # Signal success. :/
-        1;
+      ${runOnNode "introducer" [ run-introducer "/tmp/node.pem" (toString introducerPort) introducerFURL ]}
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $introducer->execute('cat /tmp/stdout /tmp/stderr');
@@ -142,26 +201,37 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-      $client->succeed('set -eo pipefail; ${run-client} ${introducerFURL} ${issuerURL} | systemd-cat');
+      ${runOnNode "client"  [ run-client introducerFURL issuerURL ]}
       $client->waitForOpenPort(3456);
+
+      # Make sure the fake Stripe API server is ready for requests.
+      eval {
+        $api_stripe_com->waitForUnit("api.stripe.com");
+        1;
+      } or do {
+        my ($code, $log) = $api_stripe_com->execute('journalctl -u api.stripe.com');
+        $api_stripe_com->log($log);
+        die $@;
+      };
 
       # Get some ZKAPs from the issuer.
       eval {
-        $client->succeed('set -eo pipefail; ${get-passes} http://127.0.0.1:3456 ${issuerURL} | systemd-cat');
-        # succeed() is not success but 1 is.
-        1;
+        ${runOnNode "client" [ get-passes "http://127.0.0.1:3456" issuerURL voucher ]}
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
         $client->log($log);
+
+        # Dump the fake Stripe API server logs, too, since the error may arise
+        # from a PaymentServer/Stripe interaction.
+        my ($code, $log) = $api_stripe_com->execute('journalctl -u api.stripe.com');
+        $api_stripe_com->log($log);
         die $@;
       };
 
       # The client should be prepped now.  Make it try to use some storage.
       eval {
-        $client->succeed('set -eo pipefail; ${exercise-storage} /tmp/client | systemd-cat');
-        # nothing succeeds like ... 1.
-        1;
+        ${runOnNode "client" [ exercise-storage "/tmp/client" ]}
       } or do {
         my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');

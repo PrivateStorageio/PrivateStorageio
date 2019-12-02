@@ -41,12 +41,12 @@ in {
         algorithm or Ristretto for Ristretto-flavored PrivacyPass.
       '';
     };
-    services.private-storage-issuer.ristrettoSigningKey = lib.mkOption {
+    services.private-storage-issuer.ristrettoSigningKeyPath = lib.mkOption {
       default = null;
-      type = lib.types.str;
+      type = lib.types.path;
       description = ''
-        The Ristretto signing key to use.  Required if the issuer is
-        ``Ristretto``.
+        The path to a file containing the Ristretto signing key to use.
+        Required if the issuer is ``Ristretto``.
       '';
     };
     services.private-storage-issuer.stripeSecretKeyPath = lib.mkOption {
@@ -55,6 +55,27 @@ in {
         The path to a file containing a Stripe secret key to use for charge
         and payment management.
       '';
+    };
+    services.private-storage-issuer.stripeEndpointDomain = lib.mkOption {
+      type = lib.types.str;
+      description = ''
+        The domain name for the Stripe API HTTP endpoint.
+      '';
+      default = "api.stripe.com";
+    };
+    services.private-storage-issuer.stripeEndpointScheme = lib.mkOption {
+      type = lib.types.enum [ "HTTP" "HTTPS" ];
+      description = ''
+        Whether to use HTTP or HTTPS for the Stripe API.
+      '';
+      default = "HTTPS";
+    };
+    services.private-storage-issuer.stripeEndpointPort = lib.mkOption {
+      type = lib.types.int;
+      description = ''
+        The port number for the Stripe API HTTP endpoint.
+      '';
+      default = 443;
     };
     services.private-storage-issuer.database = lib.mkOption {
       default = "Memory";
@@ -76,6 +97,14 @@ in {
       description = ''
         An email address to give to Let's Encrypt as an operational contact
         for the service's TLS certificate.
+      '';
+    };
+    services.private-storage-issuer.allowedChargeOrigins = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      description = ''
+        The CORS "Origin" values which are allowed to submit charges to the
+        payment server.  Note this is not currently enforced by the
+        PaymentServer.  It just controls the CORS headers served.
       '';
     };
   };
@@ -116,7 +145,7 @@ in {
           issuerArgs =
             if cfg.issuer == "Trivial"
               then "--issuer Trivial"
-              else "--issuer Ristretto --signing-key ${cfg.ristrettoSigningKey}";
+              else "--issuer Ristretto --signing-key-path ${cfg.ristrettoSigningKeyPath}";
           databaseArgs =
             if cfg.database == "Memory"
               then "--database Memory"
@@ -131,9 +160,18 @@ in {
             else
               # Only for automated testing.
               "--http-port 80";
-          stripeArgs = "--stripe-key ${builtins.readFile cfg.stripeSecretKeyPath}";
+
+          prefixOption = s: "--cors-origin=" + s;
+          originStrings = map prefixOption cfg.allowedChargeOrigins;
+          originArgs = builtins.concatStringsSep " " originStrings;
+
+          stripeArgs =
+            "--stripe-key-path ${cfg.stripeSecretKeyPath} " +
+            "--stripe-endpoint-domain ${cfg.stripeEndpointDomain} " +
+            "--stripe-endpoint-scheme ${cfg.stripeEndpointScheme} " +
+            "--stripe-endpoint-port ${toString cfg.stripeEndpointPort}";
         in
-          "${cfg.package}/bin/PaymentServer-exe ${issuerArgs} ${databaseArgs} ${httpsArgs} ${stripeArgs}";
+          "${cfg.package}/bin/PaymentServer-exe ${originArgs} ${issuerArgs} ${databaseArgs} ${httpsArgs} ${stripeArgs}";
     };
 
     # Certificate renewal.  We must declare that we *require* it in our

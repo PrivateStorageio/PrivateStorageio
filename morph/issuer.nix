@@ -3,6 +3,7 @@
 , stripeSecretKeyPath
 , issuerDomain
 , letsEncryptAdminEmail
+, allowedChargeOrigins
 , stateVersion
 , ...
 }: {
@@ -26,13 +27,14 @@
 
   services.private-storage-issuer = {
     enable = true;
-    # XXX This should be passed as a path.
-    ristrettoSigningKey = builtins.readFile (./.. + ristrettoSigningKeyPath);
+    tls = true;
+    ristrettoSigningKeyPath = ./.. + ristrettoSigningKeyPath;
     stripeSecretKeyPath = ./.. + stripeSecretKeyPath;
     database = "SQLite3";
     databasePath = "/var/db/vouchers.sqlite3";
     inherit letsEncryptAdminEmail;
     domain = issuerDomain;
+    inherit allowedChargeOrigins;
   };
 
   system.stateVersion = stateVersion;
