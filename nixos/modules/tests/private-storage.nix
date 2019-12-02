@@ -133,6 +133,14 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       };
     } // networkConfig;
 
+    # Also run a fake Stripe API endpoint server.  Nodes in these tests run on
+    # a network without outside access so we can't easily use the real Stripe
+    # API endpoint and with this one we have greater control over the
+    # behavior, anyway, without all of the unintentional transient network
+    # errors that come from the public internet.  These tests *aren't* meant
+    # to prove PaymentServer correctly interacts with the real Stripe API
+    # server so this is an unverified fake.  The PaymentServer test suite
+    # needs to take care of any actual Stripe API integration testing.
     "api_stripe_com" =
     { config, pkgs, ... }:
       let python = pkgs.python3.withPackages (ps: [ ps.twisted ]);
