@@ -32,10 +32,10 @@
     # Include the results of the hardware scan.
     hardware
     # Configure it as a system operated by 100TB.
-    ../nixos/modules/100tb.nix
+    ../../nixos/modules/100tb.nix
     # Bring in our module for configuring the Tahoe-LAFS service and other
     # Private Storage-specific things.
-    ../nixos/modules/private-storage.nix
+    ../../nixos/modules/private-storage.nix
   ];
 
   # Pass the configuration specific to this host to the 100TB module to be

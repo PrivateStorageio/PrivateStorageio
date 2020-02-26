@@ -1,9 +1,9 @@
 # Load the helper function and call it with arguments tailored for the testing
 # grid.  It will make the morph configuration for us.  We share this function
 # with the testing grid and have one fewer possible point of divergence.
-import ./make-grid.nix {
+import ../../lib/make-grid.nix {
   name = "Production";
-  config = ./grid.config.json;
+  config = ./config.json;
   nodes = cfg: {
     # Here are the hosts that are in this morph network.  This is sort of like
     # a server manifest.  We try to keep as many of the specific details as
@@ -17,32 +17,32 @@ import ./make-grid.nix {
     # doesn't specify one.
     #
     # The names must be unique!
-    "payments.privatestorage.io" = import ./issuer.nix ({
-      hardware = ./issuer-aws.nix;
+    "payments.privatestorage.io" = import ../../lib/issuer.nix ({
+      hardware = ../../lib/issuer-aws.nix;
       stateVersion = "19.03";
     } // cfg);
 
-    "storage001" = import ./make-storage.nix ({
+    "storage001" = import ../../lib/make-storage.nix ({
         cfg = import ./storage001-config.nix;
         hardware = ./storage001-hardware.nix;
         stateVersion = "19.09";
     } // cfg);
-    "storage002" = import ./make-storage.nix ({
+    "storage002" = import ../../lib/make-storage.nix ({
         cfg = import ./storage002-config.nix;
         hardware = ./storage002-hardware.nix;
         stateVersion = "19.09";
     } // cfg);
-    "storage003" = import ./make-storage.nix ({
+    "storage003" = import ../../lib/make-storage.nix ({
         cfg = import ./storage003-config.nix;
         hardware = ./storage003-hardware.nix;
         stateVersion = "19.09";
     } // cfg);
-    "storage004" = import ./make-storage.nix ({
+    "storage004" = import ../../lib/make-storage.nix ({
         cfg = import ./storage004-config.nix;
         hardware = ./storage004-hardware.nix;
         stateVersion = "19.09";
     } // cfg);
-    "storage005" = import ./make-storage.nix ({
+    "storage005" = import ../../lib/make-storage.nix ({
         cfg = import ./storage005-config.nix;
         hardware = ./storage005-hardware.nix;
         stateVersion = "19.03";
