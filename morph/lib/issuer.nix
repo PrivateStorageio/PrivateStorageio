@@ -22,14 +22,14 @@
 
   imports = [
     hardware
-    ../nixos/modules/issuer.nix
+    ../../nixos/modules/issuer.nix
   ];
 
   services.private-storage-issuer = {
     enable = true;
     tls = true;
-    ristrettoSigningKeyPath = ./.. + ristrettoSigningKeyPath;
-    stripeSecretKeyPath = ./.. + stripeSecretKeyPath;
+    ristrettoSigningKeyPath = ./../.. + ristrettoSigningKeyPath;
+    stripeSecretKeyPath = ./../.. + stripeSecretKeyPath;
     database = "SQLite3";
     databasePath = "/var/db/vouchers.sqlite3";
     inherit letsEncryptAdminEmail;

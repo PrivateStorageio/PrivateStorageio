@@ -18,7 +18,7 @@
 
   imports = [
     hardware
-    ../nixos/modules/private-storage.nix
+    ../../nixos/modules/private-storage.nix
   ];
 
   services.private-storage =

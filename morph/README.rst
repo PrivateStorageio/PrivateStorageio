@@ -7,20 +7,24 @@ and some JSON-based configuration in ``.config.json`` files.
 
 This configuration is fed to `morph`_ to make changes to the deployment.
 
-bootstrap-configuration.nix
----------------------------
+lib
+---
 
-This is meant as a minimal system configuration to use as part of crossgrading a Debian install to NixOS.
-It has a lot of comments explaining different parts of Nix and NixOS.
-You may want to browse it before looking at other ``.nix`` files here.
+This contains Nix library code for defining the grids.
 
-grid.config.json
-----------------
+grid
+----
 
-This contains configuration for Tahoe-LAFS.
+Specific grid definitions live in subdirectories beneath this directory.
+
+config.json
+~~~~~~~~~~~
+
+As much as possible of the static configuration for the PrivateStorage.io application is provided in this file.
+It is read by **grid.nix**.
 
 grid.nix
---------
+~~~~~~~~
 
 This is the `morph`_ entrypoint for the grid.
 This defines all of the servers that are part of the grid.
@@ -30,14 +34,15 @@ You can do things like build the network::
 
   morph build grid.nix
 
+
 <hostname>-hardware.nix
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 These are the generated hardware-related configuration files for servers in the grid.
 These files are referenced from the corresponding ``<hostname>.nix`` files.
 
 <hostname>-config.nix
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 Each such file contains a minimal Nix expression supplying critical system configuration details.
 "Critical" roughly corresponds to anything which must be specified to have a bootable system.
@@ -76,6 +81,6 @@ starting from a minimal NixOS 19.03 or 19.09 installation.
 
 #. Create a ``storageNNN-config.nix`` containing further configuration for the new host.
 #. Add an entry for the new host to ``grid.nix`` referencing the new files.
-#. Deploy to the new host with ``morph deploy morph/grid.nix --on <identifier> boot --upload-secrets --reboot``.
+#. Deploy to the new host with ``morph deploy morph/.../grid.nix --on <identifier> boot --upload-secrets --reboot``.
 
 .. _`morph`: https://github.com/DBCDK/morph
