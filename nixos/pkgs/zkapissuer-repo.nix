@@ -4,6 +4,6 @@ in
   pkgs.fetchFromGitHub {
     owner = "PrivateStorageio";
     repo = "PaymentServer";
-    rev = "1130b17e85392efd9f6be733308542b50bded1e3";
-    sha256 = "1ivcy3xcakxs0yfvbnvizq9pchp15g2wdprh5r5rq4fkqk8k6nbf";
+    rev = "d6ad0042842ca0501c1e378b19bfdb42d5644223";
+    sha256 = "018ybp83ljdwjn2kv1smkb5rx5h0hgw17a452bsyxdq61ysv4ajv";
   }

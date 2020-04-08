@@ -17,6 +17,14 @@
         permissions = "0400";
         action = ["sudo" "systemctl" "restart" "zkapissuer.service"];
       };
+      "stripe-secret-key" = {
+        source = stripeSecretKeyPath;
+        destination = "/var/secrets/stripe.secret-key";
+        owner.user = "root";
+        owner.group = "root";
+        permissions = "0400";
+        action = ["sudo" "systemctl" "restart" "zkapissuer.service"];
+      };
     };
   };
 
@@ -28,8 +36,8 @@
   services.private-storage-issuer = {
     enable = true;
     tls = true;
-    ristrettoSigningKeyPath = ./../.. + ristrettoSigningKeyPath;
-    stripeSecretKeyPath = ./../.. + stripeSecretKeyPath;
+    ristrettoSigningKeyPath = "/var/secrets/ristretto.signing-key";
+    stripeSecretKeyPath = "/var/secrets/stripe.secret-key";
     database = "SQLite3";
     databasePath = "/var/db/vouchers.sqlite3";
     inherit letsEncryptAdminEmail;
