@@ -5,6 +5,20 @@ let
   pspkgs = pkgs.callPackage ./pspkgs.nix { };
   # Grab the configuration for this module for convenient access below.
   cfg = config.services.private-storage;
+  storage-node-name = "storage";
+  # TODO: This path copied from tahoe.nix.
+  tahoe-base = "/var/db/tahoe-lafs";
+
+  # The full path to the directory where the storage server will write
+  # incident reports.
+  incidents-dir = "${tahoe-base}/${storage-node-name}/logs/incidents";
+
+  # The maximum age that will be allowed for incident reports.  See
+  # tmpfiles.d(5) for the syntax.
+  #
+  # NOTE: This is promised by the service privacy policy.  It *may not* be
+  # raised without following the process for updating the privacy policy.
+  max-incident-age = "29d";
 in
 {
   # Upstream tahoe-lafs module conflicts with ours (since ours is a
@@ -75,7 +89,7 @@ in
   # Define configuration based on values given for our options - starting with
   # the option that says whether this is even turned on.
   config = lib.mkIf cfg.enable
-  { services.tahoe.nodes."storage" =
+  { services.tahoe.nodes."${storage-node-name}" =
     { package = config.services.private-storage.tahoe.package;
       # Each attribute in this set corresponds to a section in the tahoe.cfg
       # file.  Attributes on those sets correspond to individual assignments
@@ -89,7 +103,7 @@ in
         };
         node =
         # XXX Should try to name that is unique across the grid.
-        { nickname = "storage";
+        { nickname = "${storage-node-name}";
           # We have the web port active because the CLI uses it.  We may
           # eventually turn this off, or at least have it off by default (with
           # an option to turn it on).  I don't know how much we'll use the CLI
@@ -124,6 +138,12 @@ in
 
     # Let traffic destined for the storage node's Foolscap server through.
     networking.firewall.allowedTCPPorts = [ cfg.publicStoragePort ];
+
+    systemd.tmpfiles.rules =
+    # Add a rule to prevent incident reports from accumulating indefinitely.
+    # See tmpfiles.d(5) for the syntax.
+    [ "d ${incidents-dir} 0755 root root ${max-incident-age} -"
+    ];
 
   };
 }
