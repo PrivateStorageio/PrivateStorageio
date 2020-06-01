@@ -8,6 +8,17 @@ let
   storage-node-name = "storage";
   # TODO: This path copied from tahoe.nix.
   tahoe-base = "/var/db/tahoe-lafs";
+
+  # The full path to the directory where the storage server will write
+  # incident reports.
+  incidents-dir = "${tahoe-base}/${storage-node-name}/logs/incidents";
+
+  # The maximum age that will be allowed for incident reports.  See
+  # tmpfiles.d(5) for the syntax.
+  #
+  # NOTE: This is promised by the service privacy policy.  It *may not* be
+  # raised without following the process for updating the privacy policy.
+  max-incident-age = "29d";
 in
 {
   # Upstream tahoe-lafs module conflicts with ours (since ours is a
@@ -130,8 +141,8 @@ in
 
     systemd.tmpfiles.rules =
     # Add a rule to prevent incident reports from accumulating indefinitely.
-    # See tmpfiles.d(5).
-    [ "d ${tahoe-base}/${storage-node-name}/logs/incidents 0755 root root 29d -"
+    # See tmpfiles.d(5) for the syntax.
+    [ "d ${incidents-dir} 0755 root root ${max-incident-age} -"
     ];
 
   };
