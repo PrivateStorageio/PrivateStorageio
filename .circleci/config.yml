@@ -24,8 +24,7 @@ jobs:
       - run:
           name: "Run Tests"
           command: |
-            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
-            nix-build nixos/unit-tests.nix && cat result
+            nix-shell --run 'nix-build nixos/unit-tests.nix' && cat result
 
   system-tests-driver:
     # Cannot actually run the system tests on CircleCI but we can build
@@ -54,14 +53,13 @@ jobs:
             # If nixpkgs changes then potentially a lot of cached packages for
             # the base system will be invalidated so we may as well drop them
             # and make a new cache with the new packages.
-            - privatestorageio-nix-store-v2-{{ checksum "nixpkgs.rev" }}
+            - privatestorageio-nix-store-v2-{{ checksum "nixpkgs.json" }}
             - privatestorageio-nix-store-v2-
 
       - run:
           name: "Build System Test Driver"
           command: |
-            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
-            nix-build --max-jobs 1 --cores 1 nixos/system-tests.nix -A driver
+            nix-shell --run 'nix-build --max-jobs 1 --cores 1 nixos/system-tests.nix -A driver'
 
           # Give it a good long while.  PaymentServer and its dependencies, in
           # particular, can take a while to build.
@@ -69,7 +67,7 @@ jobs:
 
       - save_cache:
           name: "Cache Nix Store Paths"
-          key: privatestorageio-nix-store-v2-{{ checksum "nixpkgs.rev" }}
+          key: privatestorageio-nix-store-v2-{{ checksum "nixpkgs.json" }}
           paths:
             - "/nix"
 
@@ -83,18 +81,17 @@ jobs:
           # See comments for nix store caching in `build` job.
           name: "Restore Nix Store Paths"
           keys:
-            - privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.rev" }}
+            - privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.json" }}
             - privatestorageio-docs-nix-store-v1-
 
       - run:
           name: "Nix Build"
           command: |
-            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
-            nix-build docs.nix
+            nix-shell --run 'nix-build docs.nix'
 
       - save_cache:
           name: "Cache Nix Store Paths"
-          key: privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.rev" }}
+          key: privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.json" }}
           paths:
             - "/nix"
 
