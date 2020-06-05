@@ -24,8 +24,7 @@ jobs:
       - run:
           name: "Run Tests"
           command: |
-            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
-            nix-build nixos/unit-tests.nix && cat result
+            nix-shell --run 'nix-build nixos/unit-tests.nix' && cat result
 
   system-tests-driver:
     # Cannot actually run the system tests on CircleCI but we can build
@@ -60,8 +59,7 @@ jobs:
       - run:
           name: "Build System Test Driver"
           command: |
-            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
-            nix-build --max-jobs 1 --cores 1 nixos/system-tests.nix -A driver
+            nix-shell --run 'nix-build --max-jobs 1 --cores 1 nixos/system-tests.nix -A driver'
 
           # Give it a good long while.  PaymentServer and its dependencies, in
           # particular, can take a while to build.
@@ -89,8 +87,7 @@ jobs:
       - run:
           name: "Nix Build"
           command: |
-            export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$(cat nixpkgs.rev).tar.gz
-            nix-build docs.nix
+            nix-shell --run 'nix-build docs.nix'
 
       - save_cache:
           name: "Cache Nix Store Paths"
