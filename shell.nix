@@ -1,10 +1,6 @@
 let
-  nixpkgs-rev = builtins.readFile ./nixpkgs.rev;
-  nixpkgs-url = "https://github.com/NixOS/nixpkgs-channels/archive/${nixpkgs-rev}.tar.gz";
-  nixpkgs-src = builtins.fetchTarball {
-    url = nixpkgs-url;
-    sha256 = "sha256:0bv34yz892yxhx2kb8a1yr5pm0g8ck5w021yj87r7kfnp416apdh";
-  };
+  nixpkgs-pin = builtins.fromJSON (builtins.readFile ./nixpkgs.json);
+  nixpkgs-src = builtins.fetchTarball nixpkgs-pin;
   nixpkgs = import nixpkgs-src { };
 in
 { pkgs ? nixpkgs }:
@@ -19,7 +15,7 @@ let
   morph = pkgs.callPackage (morph-src + "/nix-packaging") { };
 in
 pkgs.mkShell {
-  NIX_PATH = "nixpkgs=${nixpkgs-src}";
+  NIX_PATH = "nixpkgs=${nixpkgs-pin.url}";
   buildInputs = [
     morph
   ];
