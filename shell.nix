@@ -1,7 +1,11 @@
 let
   nixpkgs-rev = builtins.readFile ./nixpkgs.rev;
-  nixpkgs-src = "https://github.com/NixOS/nixpkgs-channels/archive/${nixpkgs-rev}.tar.gz";
-  nixpkgs = import (builtins.fetchTarball nixpkgs-src) { };
+  nixpkgs-url = "https://github.com/NixOS/nixpkgs-channels/archive/${nixpkgs-rev}.tar.gz";
+  nixpkgs-src = builtins.fetchTarball {
+    url = nixpkgs-url;
+    sha256 = "sha256:0bv34yz892yxhx2kb8a1yr5pm0g8ck5w021yj87r7kfnp416apdh";
+  };
+  nixpkgs = import nixpkgs-src { };
 in
 { pkgs ? nixpkgs }:
 let
