@@ -1,4 +1,4 @@
-# A NixOS module which can run a Ristretto-based issuer for PrivacyStorage
+# A NixOS module which can run a Ristretto-based issuer for PrivateStorage
 # ZKAPs.
 { lib, pkgs, config, ... }: let
   pspkgs = pkgs.callPackage ./pspkgs.nix { };
