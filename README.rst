@@ -7,7 +7,6 @@ Building
 --------
 
 The build system uses `Nix`_ which must be installed before anything can be built.
-Builds are tested against a particular nixpkgs revision.
 Start by setting up the development/operations environment::
 
   $ nix-shell
