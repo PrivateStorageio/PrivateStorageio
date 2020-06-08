@@ -165,6 +165,12 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       # Start booting all the VMs in parallel to speed up operations down below.
       startAll;
 
+      # The issuer and the storage server should accept SSH connections.  This
+      # doesn't prove it is so but if it fails it's a pretty good indication
+      # it isn't so.
+      $storage->waitForOpenPort(22);
+      $issuer->waitForOpenPort(22);
+
       # Set up a Tahoe-LAFS introducer.
       $introducer->copyFileFromHost(
           '${pemFile}',

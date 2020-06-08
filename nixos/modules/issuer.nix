@@ -5,6 +5,11 @@
   zkapissuer = pspkgs.callPackage ../pkgs/zkapissuer.nix { };
   cfg = config.services.private-storage-issuer;
 in {
+  imports = [
+    # Give it a good SSH configuration.
+    ../../nixos/modules/ssh.nix
+  ];
+
   options = {
     services.private-storage-issuer.enable = lib.mkEnableOption "PrivateStorage ZKAP Issuer Service";
     services.private-storage-issuer.package = lib.mkOption {

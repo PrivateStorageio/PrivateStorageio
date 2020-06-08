@@ -69,11 +69,6 @@ let
       example = lib.literalExample "wwn-0x5000c500936410b9";
       description = "The ID of the disk on which to install grub.";
     };
-    rootPublicKey = lib.mkOption
-    { type = lib.types.str;
-      example = lib.literalExample "ssh-ed25519 AAAA... username@host";
-      description = "The public key to install for the root user.";
-    };
   };
 in {
   # Here we actually define the module's options.  They're what we said they
@@ -112,11 +107,6 @@ in {
 
     boot.loader.timeout = 1;
     networking.firewall.enable = false;
-    services.openssh.enable = true;
-
-    users.users.root.openssh.authorizedKeys.keys = [
-      cfg.rootPublicKey
-    ];
 
     networking.hostId = cfg.hostId;
     networking.dhcpcd.enable = false;
