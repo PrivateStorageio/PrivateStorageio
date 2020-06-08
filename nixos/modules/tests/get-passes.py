@@ -42,13 +42,23 @@ def main():
         response.raise_for_status()
 
     # Poll the vouchers list for a while to see it get redeemed.
-    expected = {"version": 1, "number": voucher, "redeemed": True}
     def find_redeemed_voucher():
         response = get(zkapauthz + "/voucher/" + voucher)
         response.raise_for_status()
         actual = response.json()
         print("Actual response: {}".format(actual))
-        return expected == actual
+        try:
+            check = (
+                actual["version"],
+                actual["number"],
+                actual["state"]["name"],
+            )
+        except Exception as e:
+            print("Check failed: {}".format(e))
+            return False
+        else:
+            print("Checking {}".format(check))
+            return check == (1, voucher, "redeemed")
 
     retry(
         "find redeemed voucher",

@@ -172,10 +172,10 @@ in
         #   (node: settings: settings.tub.port);
         systemd.services = flip mapAttrs' cfg.nodes (node: settings:
           let
-            pidfile = "/run/tahoe.${node}.pid";
+            pidfile = "/run/tahoe.${lib.escapeShellArg node}.pid";
             # This is a directory, but it has no trailing slash. Tahoe commands
             # get antsy when there's a trailing slash.
-            nodedir = "/var/db/tahoe-lafs/${node}";
+            nodedir = "/var/db/tahoe-lafs/${lib.escapeShellArg node}";
           in nameValuePair "tahoe.${node}" {
             description = "Tahoe LAFS node ${node}";
             wantedBy = [ "multi-user.target" ];
@@ -189,13 +189,31 @@ in
               # arguments to $(tahoe run). The node directory must come first,
               # and arguments which alter Twisted's behavior come afterwards.
               ExecStart = ''
-                ${settings.package}/bin/tahoe run ${lib.escapeShellArg nodedir} -n -l- --pidfile=${lib.escapeShellArg pidfile}
+                ${settings.package}/bin/tahoe run ${nodedir} -n -l- --pidfile=${pidfile}
               '';
             };
-            preStart = ''
-              if [ ! -d ${lib.escapeShellArg nodedir} ]; then
-                mkdir -p /var/db/tahoe-lafs
-                tahoe create-node --hostname=localhost ${lib.escapeShellArg nodedir}
+            preStart =
+            let
+              created = "${nodedir}.created";
+              atomic = "${nodedir}.atomic";
+            in ''
+              if [ ! -e ${created} ]; then
+                mkdir -p /var/db/tahoe-lafs/
+
+                # Get rid of any prior partial efforts.  It might not exist.
+                # Don't let this tank us.
+                rm -rv ${atomic} && [ ! -e ${atomic} ]
+
+                # Really create the node.
+                tahoe create-node --hostname=localhost ${atomic}
+
+                # Move it to the real location.  We don't create it in-place
+                # because we might fail partway through and leave inconsistent
+                # state.  Also, systemd probably created logs/incidents/ already and
+                # `create-node` complains if it finds these exist already.
+                rm -rv ${nodedir} && [ ! -e ${nodedir} ]
+                mv ${atomic} ${nodedir}
+                touch ${created}
               fi
 
               # Tahoe has created a predefined tahoe.cfg which we must now
@@ -204,7 +222,7 @@ in
               # we must do this on every prestart. Fixes welcome.
               # rm ${nodedir}/tahoe.cfg
               # ln -s /etc/tahoe-lafs/${lib.escapeShellArg node}.cfg ${nodedir}/tahoe.cfg
-              cp /etc/tahoe-lafs/${lib.escapeShellArg node}.cfg ${lib.escapeShellArg nodedir}/tahoe.cfg
+              cp /etc/tahoe-lafs/${lib.escapeShellArg node}.cfg ${nodedir}/tahoe.cfg
             '';
           });
         users.users = flip mapAttrs' cfg.nodes (node: _:
