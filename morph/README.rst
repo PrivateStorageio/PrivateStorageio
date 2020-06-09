@@ -3,9 +3,34 @@ Morph
 
 This directory contains Nix-based configuration for the grid.
 This takes the form of Nix expressions in ``.nix`` files
-and some JSON-based configuration in ``.config.json`` files.
+and some JSON-based configuration in ``.json`` files.
 
 This configuration is fed to `morph`_ to make changes to the deployment.
+
+Deploying
+---------
+
+The deployment consists of the public software packages and the private secrets.
+You can deploy these together::
+
+  morph deploy --upload-secrets morph/grid/<testing|production|...>/grid.nix test
+
+Or separately::
+
+  morph deploy morph/grid/<testing|production|...>/grid.nix test
+  morph upload-secrets morph/grid/<testing|production|...>/grid.nix
+
+Separate deployment is useful when the software deploy is done from system which may not be sufficiently secure to host the secrets
+(such as a cloud build machine).
+Secrets should only be hosted on an extremely secure system
+(XXX write the document for what this means).
+
+Note secrets only need to be uploaded after a host in the grid has been rebooted.
+
+See the ``morph`` and ``nixos-rebuild`` documentation for more details about these commands.
+
+Filesystem Layout
+`````````````````
 
 lib
 ---
@@ -49,7 +74,7 @@ Each such file contains a minimal Nix expression supplying critical system confi
 These files are referenced by the corresponding ``<hostname>.nix`` files.
 
 Configuring New Storage Nodes
------------------------------
+`````````````````````````````
 
 Storage nodes are brought into the grid in a multi-step process.
 Here are the steps to configure a new node,
