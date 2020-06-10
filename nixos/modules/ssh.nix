@@ -38,7 +38,9 @@
         PermitEmptyPasswords no
 
         # Only allow authentication as one of the configured users, not random
-        # other (often system-managed) users.
+        # other (often system-managed) users.  Possibly this is also
+        # superfluous!  NixOS system users have nologin as their shell ... so they
+        # cannot log in anyway.
         AllowUsers ${builtins.concatStringsSep " " (builtins.attrNames cfg.sshUsers)}
       '';
     };
