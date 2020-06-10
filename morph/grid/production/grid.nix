@@ -18,6 +18,7 @@ import ../../lib/make-grid.nix {
     #
     # The names must be unique!
     "payments.privatestorage.io" = import ../../lib/issuer.nix ({
+      sshUsers = import ../../../../PrivateStorageSecrets/production-users.nix;
       hardware = ../../lib/issuer-aws.nix;
       stateVersion = "19.03";
     } // cfg);

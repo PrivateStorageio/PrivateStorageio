@@ -4,6 +4,7 @@
 , issuerDomain
 , letsEncryptAdminEmail
 , allowedChargeOrigins
+, sshUsers
 , stateVersion
 , ...
 }: {
@@ -33,6 +34,7 @@
     ../../nixos/modules/issuer.nix
   ];
 
+  services.private-storage.sshUsers = sshUsers;
   services.private-storage-issuer = {
     enable = true;
     tls = true;

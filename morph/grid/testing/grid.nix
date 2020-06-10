@@ -6,6 +6,7 @@ import ../../lib/make-grid.nix {
   config = ./config.json;
   nodes = cfg: {
     "payments.privatestorage-staging.com" = import ../../lib/issuer.nix ({
+      sshUsers = import ../../../../PrivateStorageSecrets/staging-users.nix;
       hardware = ../../lib/issuer-aws.nix;
       stateVersion = "19.03";
     } // cfg);
