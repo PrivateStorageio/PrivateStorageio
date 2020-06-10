@@ -5,14 +5,15 @@ let
   sshPrivateKey = ./probeuser_ed25519;
   sshPublicKey = ./probeuser_ed25519.pub;
   sshUsers = {
+    root = (builtins.readFile sshPublicKey);
     probeuser = (builtins.readFile sshPublicKey);
   };
   # Generate a command which can be used with runOnNode to ssh to the given
   # host.
-  ssh = hostname: [
+  ssh = username: hostname: [
     "cp" sshPrivateKey "/tmp/ssh_key" ";"
     "chmod" "0400" "/tmp/ssh_key" ";"
-    "ssh" "-oStrictHostKeyChecking=no" "-i" "/tmp/ssh_key" "probeuser@${hostname}" ":"
+    "ssh" "-oStrictHostKeyChecking=no" "-i" "/tmp/ssh_key" "${username}@${hostname}" ":"
   ];
 
   # Separate helper programs so we can write as little perl inside a string
@@ -186,9 +187,11 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       # doesn't prove it is so but if it fails it's a pretty good indication
       # it isn't so.
       $storage->waitForOpenPort(22);
-      ${runOnNode "issuer" (ssh "storage")}
+      ${runOnNode "issuer" (ssh "probeuser" "storage")}
+      ${runOnNode "issuer" (ssh "root" "storage")}
       $issuer->waitForOpenPort(22);
-      ${runOnNode "storage" (ssh "issuer")}
+      ${runOnNode "storage" (ssh "probeuser" "issuer")}
+      ${runOnNode "storage" (ssh "root" "issuer")}
 
       # Set up a Tahoe-LAFS introducer.
       $introducer->copyFileFromHost(

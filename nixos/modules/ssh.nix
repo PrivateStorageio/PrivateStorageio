@@ -45,7 +45,7 @@
 
     users.users =
       let makeUserConfig = username: sshPublicKey: {
-        isNormalUser = true;
+        isNormalUser = username != "root";
         openssh.authorizedKeys.keys = [ sshPublicKey ];
       };
       in builtins.mapAttrs makeUserConfig cfg.sshUsers;
