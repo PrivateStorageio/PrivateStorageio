@@ -5,10 +5,18 @@
   ...
 }: {
   options = {
+    services.private-storage.sshUsers = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      example = lib.literalExample { root = "ssh-ed25519 AAA..."; };
+      description = ''
+        Users to configure on the issuer server and the storage servers and
+        the SSH public keys to use to authenticate them.
+      '';
+    };
   };
   config =
   let
-    cfg = config."private-storage".config;
+     cfg = config.services."private-storage";
   in {
     # An attempt at a properly secure SSH configuration.  This is informed by
     # personal experience as well as various web resources:
@@ -29,13 +37,17 @@
         # password-based authentication at all.
         PermitEmptyPasswords no
 
-        # Don't allow authentication as random system users.
-        AllowUsers root
+        # Only allow authentication as one of the configured users, not random
+        # other (often system-managed) users.
+        AllowUsers ${builtins.concatStringsSep " " (builtins.attrNames cfg.sshUsers)}
       '';
     };
 
-    users.users.root.openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN4GenAY/YLGuf1WoMXyyVa3S9i4JLQ0AG+pt7nvcLlQ exarkun@baryon"
-    ];
+    users.users =
+      let makeUserConfig = username: sshPublicKey: {
+        isNormalUser = true;
+        openssh.authorizedKeys.keys = [ sshPublicKey ];
+      };
+      in builtins.mapAttrs makeUserConfig cfg.sshUsers;
   };
 }
