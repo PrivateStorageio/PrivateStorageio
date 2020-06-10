@@ -8,7 +8,7 @@ and some JSON-based configuration in ``.json`` files.
 This configuration is fed to `morph`_ to make changes to the deployment.
 
 Deploying
----------
+`````````
 
 The deployment consists of the public software packages and the private secrets.
 You can deploy these together::
