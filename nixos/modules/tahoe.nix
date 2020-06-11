@@ -128,38 +128,6 @@ in
               ExecStart = ''
                 ${settings.package}/bin/tahoe run ${lib.escapeShellArg nodedir} -n -l- --pidfile=${lib.escapeShellArg pidfile}
               '';
-
-              # The rlimit on number of open files controls how many
-              # connections a particular storage server can accept (factoring
-              # in the number of non-connection files the server needs open -
-              # eg for logging, reading and writing shares, etc).
-              #
-              # Once the maximum number of open files, as controlled by rlimit
-              # is reached, service suffers dramatically. New connections
-              # cannot be accepted. Shares cannot be read or written.
-              #
-              # The default limit on open files is 8192 (2^13). This could
-              # easily be raised. If it is raised to 2^16 then the rlimit is
-              # approximately equal to the limit imposed by TCP (which only
-              # has around 2^16 ports available per IP address). If we want
-              # each connection to also be able to read or write a share file,
-              # a limit of 2^15 would allow this. Then, we should scale the
-              # limit linearly with the number of IP addresses available. If
-              # the service can be reached on 2 IP addresses, allow twice as
-              # many files (2^15 * 2 = 2^16). If it can be reached on 3 IP
-              # addresses, (2^16 * 3). etc.
-              #
-              # Python also sometimes wants to open files as a side effect of
-              # other things going.  For example, if there's a traceback, it
-              # opens the source files to read lines to put into the
-              # traceback.  If random numbers are generated, /dev/urandom
-              # might be opened, etc.  There is also some fixed overhead for
-              # listening ports and such.  This currently doesn't factor into
-              # our choice but perhaps it could somehow.
-              #
-              # There is only one IPv4 address assigned to each host right
-              # now. So it makes sense to have the limit be 2^15 right now.
-              LimitNOFILE = 32768;
             };
             preStart = ''
               if [ ! -d ${lib.escapeShellArg nodedir} ]; then
@@ -223,6 +191,42 @@ in
               ExecStart = ''
                 ${settings.package}/bin/tahoe run ${nodedir} -n -l- --pidfile=${pidfile}
               '';
+              # The rlimit on number of open files controls how many
+              # connections a particular storage server can accept (factoring
+              # in the number of non-connection files the server needs open -
+              # eg for logging, reading and writing shares, etc).
+              #
+              # Once the maximum number of open files, as controlled by rlimit
+              # is reached, service suffers dramatically. New connections
+              # cannot be accepted. Shares cannot be read or written.
+              #
+              # The default limit on open files is fairly low, perhaps 1024
+              # (2^10) or 8192 (2^13). This can easily be raised. If it is
+              # raised to 2^16 then the rlimit is approximately equal to the
+              # limit imposed by TCP (which only has around 2^16 ports
+              # available per IP address). If we want each connection to also
+              # be able to read or write a share file, a limit of 2^15 would
+              # allow this. Then, we should scale the limit linearly with the
+              # number of IP addresses available. If the service can be
+              # reached on 2 IP addresses, allow twice as many files (2^15 * 2
+              # = 2^16). If it can be reached on 3 IP addresses, (2^16 *
+              # 3). etc.
+              #
+              # Python also sometimes wants to open files as a side effect of
+              # other things going.  For example, if there's a traceback, it
+              # opens the source files to read lines to put into the
+              # traceback.  If random numbers are generated, /dev/urandom
+              # might be opened, etc.  There is also some fixed overhead for
+              # listening ports and such.  This currently doesn't factor into
+              # our choice but perhaps it could somehow.
+              #
+              # There is only one IPv4 address assigned to each host right
+              # now. So it makes sense to have the limit be 2^15 right now.
+              LimitNOFILE = 32768;
+
+              # Tahoe-LAFS has no logic to raise soft limit to hard limit so
+              # make it the same.
+              LimitNOFILESoft = 32768;
             };
             preStart =
             let
