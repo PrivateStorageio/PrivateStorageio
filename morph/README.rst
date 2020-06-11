@@ -25,7 +25,7 @@ Separate deployment is useful when the software deploy is done from system which
 Secrets should only be hosted on an extremely secure system
 (XXX write the document for what this means).
 
-Note secrets only need to be uploaded after a host in the grid has been rebooted.
+Note secrets only need to be uploaded after a host in the grid has been rebooted or when the secrets have changed.
 
 See the ``morph`` and ``nixos-rebuild`` documentation for more details about these commands.
 
