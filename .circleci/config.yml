@@ -26,12 +26,105 @@ jobs:
           command: |
             nix-shell --run 'nix-build nixos/unit-tests.nix' && cat result
 
+  build-testing:
+    # This job *builds* the whole testing grid but does not deploy it.
+    docker:
+      - image: "nixorg/nix:circleci"
+
+    steps:
+      - "checkout"
+
+      - "restore_cache":
+          # Get all of Nix's state relating to the particular revision of
+          # nixpkgs we're using.  It will always be the same.  CircleCI
+          # artifacts and nixpkgs store objects are probably mostly hosted in
+          # the same place (S3) so there's not a lot of difference for
+          # anything that's pre-built.  For anything we end up building
+          # ourselves, though, this saves us all of the build time (less the
+          # download time).
+          #
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          name: "Restore Nix Store Paths"
+          keys:
+            # Construct cache keys that allow sharing as long as nixpkgs
+            # revision is unchanged.
+            #
+            # If nixpkgs changes then potentially a lot of cached packages for
+            # the base system will be invalidated so we may as well drop them
+            # and make a new cache with the new packages.
+            - privatestorageio-nix-store-v2-build-testing-{{ checksum "nixpkgs.json" }}
+            - privatestorageio-nix-store-v2-build-testing-
+            - privatestorageio-nix-store-v2-build-
+            - privatestorageio-nix-store-v2-
+
+      - run:
+          name: "Build Testing Grid"
+          command: |
+            nix-shell --run 'morph build morph/grid/testing/grid.nix'
+
+          # Give it a good long while.  PaymentServer and its dependencies, in
+          # particular, can take a while to build.
+          no_output_timeout: "20m"
+
+      - save_cache:
+          name: "Cache Nix Store Paths"
+          key: privatestorageio-nix-store-v2-build-testing-{{ checksum "nixpkgs.json" }}
+          paths:
+            - "/nix"
+
+  build-production:
+    # This job *builds* the whole production grid but does not deploy it.
+    docker:
+      - image: "nixorg/nix:circleci"
+
+    steps:
+      - "checkout"
+
+      - "restore_cache":
+          # Get all of Nix's state relating to the particular revision of
+          # nixpkgs we're using.  It will always be the same.  CircleCI
+          # artifacts and nixpkgs store objects are probably mostly hosted in
+          # the same place (S3) so there's not a lot of difference for
+          # anything that's pre-built.  For anything we end up building
+          # ourselves, though, this saves us all of the build time (less the
+          # download time).
+          #
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          name: "Restore Nix Store Paths"
+          keys:
+            # Construct cache keys that allow sharing as long as nixpkgs
+            # revision is unchanged.
+            #
+            # If nixpkgs changes then potentially a lot of cached packages for
+            # the base system will be invalidated so we may as well drop them
+            # and make a new cache with the new packages.
+            - privatestorageio-nix-store-v2-build-production-{{ checksum "nixpkgs.json" }}
+            - privatestorageio-nix-store-v2-build-production-
+            - privatestorageio-nix-store-v2-build-
+            - privatestorageio-nix-store-v2-
+
+      - run:
+          name: "Build Production Grid"
+          command: |
+            nix-shell --run 'morph build morph/grid/production/grid.nix'
+
+          # Give it a good long while.  PaymentServer and its dependencies, in
+          # particular, can take a while to build.
+          no_output_timeout: "20m"
+
+      - save_cache:
+          name: "Cache Nix Store Paths"
+          key: privatestorageio-nix-store-v2-build-production-{{ checksum "nixpkgs.json" }}
+          paths:
+            - "/nix"
+
   system-tests-driver:
     # Cannot actually run the system tests on CircleCI but we can build
     # everything that makes them up.  This by itself can catch a lot of
     # problems.
     docker:
       - image: "nixorg/nix:circleci"
+
     steps:
       - "checkout"
 
@@ -71,7 +164,7 @@ jobs:
           paths:
             - "/nix"
 
-  build:
+  docs:
     docker:
       - image: "nixorg/nix:circleci"
     steps:
@@ -81,7 +174,8 @@ jobs:
           # See comments for nix store caching in `build` job.
           name: "Restore Nix Store Paths"
           keys:
-            - privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.json" }}
+            - privatestorageio-docs-nix-store-v1-docs-{{ checksum "nixpkgs.json" }}
+            - privatestorageio-docs-nix-store-v1-docs-
             - privatestorageio-docs-nix-store-v1-
 
       - run:
@@ -91,7 +185,7 @@ jobs:
 
       - save_cache:
           name: "Cache Nix Store Paths"
-          key: privatestorageio-docs-nix-store-v1-{{ checksum "nixpkgs.json" }}
+          key: privatestorageio-docs-nix-store-v1-docs-{{ checksum "nixpkgs.json" }}
           paths:
             - "/nix"
 
@@ -104,4 +198,6 @@ workflows:
   everything:
     jobs:
       - "test"
-      - "build"
+      - "docs"
+      - "build-testing"
+      - "build-production"
