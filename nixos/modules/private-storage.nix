@@ -29,10 +29,12 @@ in
   [ "services/network-filesystems/tahoe.nix"
   ];
 
-  # Load our tahoe-lafs module.  It is configurable in the way I want it to be
-  # configurable.
-  imports =
-  [ ./tahoe.nix
+  imports = [
+    # Give it a good SSH configuration.
+    ./ssh.nix
+    # Load our tahoe-lafs module.  It is configurable in the way I want it to
+    # be configurable.
+    ./tahoe.nix
   ];
 
   options =

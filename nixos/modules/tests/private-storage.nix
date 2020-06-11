@@ -2,6 +2,20 @@ let
   pkgs = import <nixpkgs> { };
   pspkgs = import ../pspkgs.nix { inherit pkgs; };
 
+  sshPrivateKey = ./probeuser_ed25519;
+  sshPublicKey = ./probeuser_ed25519.pub;
+  sshUsers = {
+    root = (builtins.readFile sshPublicKey);
+    probeuser = (builtins.readFile sshPublicKey);
+  };
+  # Generate a command which can be used with runOnNode to ssh to the given
+  # host.
+  ssh = username: hostname: [
+    "cp" sshPrivateKey "/tmp/ssh_key" ";"
+    "chmod" "0400" "/tmp/ssh_key" ";"
+    "ssh" "-oStrictHostKeyChecking=no" "-i" "/tmp/ssh_key" "${username}@${hostname}" ":"
+  ];
+
   # Separate helper programs so we can write as little perl inside a string
   # inside a nix expression as possible.
   run-introducer = ./run-introducer.py;
@@ -108,6 +122,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
           introducerFURL = introducerFURL;
           issuerRootURL = issuerURL;
           inherit ristrettoSigningKeyPath;
+          inherit sshUsers;
+
         };
       } // networkConfig;
 
@@ -117,6 +133,8 @@ import <nixpkgs/nixos/tests/make-test.nix> {
     { imports =
       [ ../issuer.nix
       ];
+      services.private-storage.sshUsers = sshUsers;
+
       services.private-storage-issuer = {
         enable = true;
         domain = "issuer";
@@ -164,6 +182,16 @@ import <nixpkgs/nixos/tests/make-test.nix> {
     ''
       # Start booting all the VMs in parallel to speed up operations down below.
       startAll;
+
+      # The issuer and the storage server should accept SSH connections.  This
+      # doesn't prove it is so but if it fails it's a pretty good indication
+      # it isn't so.
+      $storage->waitForOpenPort(22);
+      ${runOnNode "issuer" (ssh "probeuser" "storage")}
+      ${runOnNode "issuer" (ssh "root" "storage")}
+      $issuer->waitForOpenPort(22);
+      ${runOnNode "storage" (ssh "probeuser" "issuer")}
+      ${runOnNode "storage" (ssh "root" "issuer")}
 
       # Set up a Tahoe-LAFS introducer.
       $introducer->copyFileFromHost(
