@@ -266,5 +266,25 @@ import <nixpkgs/nixos/tests/make-test.nix> {
         $client->log($log);
         die $@;
       };
-      '';
-}
+
+      # It should be possible to restart the storage service.  Do so and
+      # ensure the client can still access it afterwards.
+      eval {
+        ${runOnNode "storage" [ "systemctl" "restart" "tahoe.storage" ]}
+      } or do {
+        my $error = $@ || 'Unknown failure';
+        my ($code, $log) = $storage->execute('cat /tmp/stdout /tmp/stderr');
+        $storage->log($log);
+        die $@;
+      };
+
+      # Same as above.
+      eval {
+        ${runOnNode "client" [ exercise-storage "/tmp/client" ]}
+      } or do {
+        my $error = $@ || 'Unknown failure';
+        my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
+        $client->log($log);
+        die $@;
+      };
+      ''; }
