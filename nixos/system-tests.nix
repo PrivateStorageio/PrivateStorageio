@@ -1,5 +1,7 @@
 # The overall system test suite for PrivateStorageio NixOS configuration.
-
-# There is only one system test so far so I don't have to do anything to
-# aggregate multiple tests...
-import ./modules/tests/private-storage.nix
+let
+  pkgs = import <nixpkgs> { };
+in {
+  private-storage = pkgs.nixosTest ./modules/tests/private-storage.nix;
+  tahoe = pkgs.nixosTest ./modules/tests/tahoe.nix;
+}

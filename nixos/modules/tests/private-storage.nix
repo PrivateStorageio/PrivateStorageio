@@ -1,5 +1,5 @@
+{ pkgs }:
 let
-  pkgs = import <nixpkgs> { };
   pspkgs = import ../pspkgs.nix { inherit pkgs; };
 
   sshPrivateKey = ./probeuser_ed25519;
@@ -89,10 +89,9 @@ let
       # succeed() is not success but 1 is.
       1;
       ";
-in
-# https://nixos.org/nixos/manual/index.html#sec-nixos-tests
-import <nixpkgs/nixos/tests/make-test.nix> {
-
+in {
+  # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
+  # https://nixos.mayflower.consulting/blog/2019/07/11/leveraging-nixos-tests-in-your-project/
   nodes = rec {
     # Get a machine where we can run a Tahoe-LAFS client node.
     client =
