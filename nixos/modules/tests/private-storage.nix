@@ -226,6 +226,9 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       # status from the node if it is really working.
       $storage->succeed('tahoe -d /var/db/tahoe-lafs/storage status');
 
+      # It should have Eliot logging turned on as well.
+      $storage->succeed('[ -e /var/db/tahoe-lafs/storage/logs/eliot.json ]');
+
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
