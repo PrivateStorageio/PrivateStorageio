@@ -1,5 +1,5 @@
+{ pkgs }:
 let
-  pkgs = import <nixpkgs> { };
   pspkgs = import ../pspkgs.nix { inherit pkgs; };
 
   sshPrivateKey = ./probeuser_ed25519;
@@ -89,10 +89,9 @@ let
       # succeed() is not success but 1 is.
       1;
       ";
-in
-# https://nixos.org/nixos/manual/index.html#sec-nixos-tests
-import <nixpkgs/nixos/tests/make-test.nix> {
-
+in {
+  # https://nixos.org/nixos/manual/index.html#sec-nixos-tests
+  # https://nixos.mayflower.consulting/blog/2019/07/11/leveraging-nixos-tests-in-your-project/
   nodes = rec {
     # Get a machine where we can run a Tahoe-LAFS client node.
     client =
@@ -202,7 +201,6 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       eval {
       ${runOnNode "introducer" [ run-introducer "/tmp/node.pem" (toString introducerPort) introducerFURL ]}
       } or do {
-        my $error = $@ || 'Unknown failure';
         my ($code, $log) = $introducer->execute('cat /tmp/stdout /tmp/stderr');
         $introducer->log($log);
         die $@;
@@ -246,7 +244,6 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       eval {
         ${runOnNode "client" [ get-passes "http://127.0.0.1:3456" issuerURL voucher ]}
       } or do {
-        my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
         $client->log($log);
 
@@ -261,10 +258,34 @@ import <nixpkgs/nixos/tests/make-test.nix> {
       eval {
         ${runOnNode "client" [ exercise-storage "/tmp/client" ]}
       } or do {
-        my $error = $@ || 'Unknown failure';
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
         $client->log($log);
         die $@;
       };
-      '';
-}
+
+      # It should be possible to restart the storage service without the
+      # storage node fURL changing.
+      eval {
+        my $furlfile = '/var/db/tahoe-lafs/storage/private/storage-plugin.privatestorageio-zkapauthz-v1.furl';
+        my $before = $storage->execute('cat ' . $furlfile);
+        ${runOnNode "storage" [ "systemctl" "restart" "tahoe.storage" ]}
+        my $after = $storage->execute('cat ' . $furlfile);
+        if ($before != $after) {
+          die 'fURL changes after storage node restart';
+        }
+        1;
+      } or do {
+        my ($code, $log) = $storage->execute('cat /tmp/stdout /tmp/stderr');
+        $storage->log($log);
+        die $@;
+      };
+
+      # The client should actually still work, too.
+      eval {
+        ${runOnNode "client" [ exercise-storage "/tmp/client" ]}
+      } or do {
+        my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
+        $client->log($log);
+        die $@;
+      };
+      ''; }

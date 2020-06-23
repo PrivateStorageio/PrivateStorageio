@@ -9,6 +9,14 @@ let
   ini = pkgs.callPackage ../lib/ini.nix { };
 in
   {
+    # Upstream tahoe-lafs module conflicts with ours (since ours is a
+    # copy/paste/edit of upstream's...).  Disable it.
+    #
+    # https://nixos.org/nixos/manual/#sec-replace-modules
+    disabledModules =
+    [ "services/network-filesystems/tahoe.nix"
+    ];
+
     options.services.tahoe = {
       introducers = mkOption {
         default = {};
@@ -233,22 +241,36 @@ in
               created = "${nodedir}.created";
               atomic = "${nodedir}.atomic";
             in ''
+              set -eo pipefail
               if [ ! -e ${created} ]; then
                 mkdir -p /var/db/tahoe-lafs/
 
                 # Get rid of any prior partial efforts.  It might not exist.
                 # Don't let this tank us.
-                rm -rv ${atomic} && [ ! -e ${atomic} ]
+                rm -rv ${atomic} || [ ! -e ${atomic} ]
 
                 # Really create the node.
                 tahoe create-node --hostname=localhost ${atomic}
 
-                # Move it to the real location.  We don't create it in-place
-                # because we might fail partway through and leave inconsistent
-                # state.  Also, systemd probably created logs/incidents/ already and
-                # `create-node` complains if it finds these exist already.
-                rm -rv ${nodedir} && [ ! -e ${nodedir} ]
+                # Get rid of any existing partially created node directory
+                # that might be in the way.
+                if [ -e ${nodedir} ]; then
+                  for backup in $(seq 1 100); do
+                    if [ ! -e ${nodedir}.$backup ]; then
+                      mv ${nodedir} ${nodedir}.$backup
+                      break
+                    fi
+                  done
+                fi
+
+                # Move the new thing to the real location.  We don't create it
+                # in-place because we might fail partway through and leave
+                # inconsistent state.  Also, systemd probably created
+                # logs/incidents/ already and `create-node` complains if it
+                # finds these exist already.
                 mv ${atomic} ${nodedir}
+
+                # Record our complete, consistent success.
                 touch ${created}
               fi
 

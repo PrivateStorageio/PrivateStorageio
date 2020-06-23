@@ -10,6 +10,8 @@ from sys import argv
 from os import urandom
 from subprocess import check_output
 from io import BytesIO
+from time import sleep, ctime
+from pprint import pprint
 
 import requests
 import hyperlink
@@ -21,9 +23,44 @@ def main():
 
     api_root = get_api_root(clientDir)
 
+    block_until_connected(api_root)
+
     subject_cap = exercise_immutable(api_root, someData)
     newDir = exercise_mkdir(api_root)
     exercise_link_unlink(api_root, newDir, subject_cap)
+
+def block_until_connected(api_root):
+    """
+    Block until the Tahoe-LAFS node at the given API root reports it has
+    connected to at least one storage server.
+    """
+    while True:
+        response = requests.get(
+            api_root.replace(query={u"t": u"json"}),
+        )
+        response.raise_for_status()
+        welcome = response.json()
+        servers = welcome["servers"]
+        connected = list(
+            server
+            for server
+            in servers
+            if server["connection_status"].startswith("Connected to ")
+        )
+        if len(connected) >= 1:
+            print(
+                "Connected to a server:\n"
+                "\t{nodeid}\n"
+                "\t{status}\n"
+                "\t{last_received_data}\n".format(
+                    nodeid=connected[0]["nodeid"],
+                    status=connected[0]["connection_status"],
+                    last_received_data=ctime(connected[0]["last_received_data"]),
+                ),
+            )
+            return
+        pprint(welcome)
+        sleep(0.1)
 
 def exercise_immutable(api_root, someData):
     cap = tahoe_put(api_root, someData)
