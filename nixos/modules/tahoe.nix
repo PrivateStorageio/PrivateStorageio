@@ -184,6 +184,7 @@ in
             # This is a directory, but it has no trailing slash. Tahoe commands
             # get antsy when there's a trailing slash.
             nodedir = "/var/db/tahoe-lafs/${lib.escapeShellArg node}";
+            eliotLog = "file:${nodedir}/logs/eliot.json,rotate_length=${toString (1024 * 1024 * 32)},max_rotated_files=32";
           in nameValuePair "tahoe.${node}" {
             description = "Tahoe LAFS node ${node}";
             wantedBy = [ "multi-user.target" ];
@@ -197,7 +198,7 @@ in
               # arguments to $(tahoe run). The node directory must come first,
               # and arguments which alter Twisted's behavior come afterwards.
               ExecStart = ''
-                ${settings.package}/bin/tahoe run ${nodedir} -n -l- --pidfile=${pidfile}
+                ${settings.package}/bin/tahoe --eliot-destination ${eliotLog} run ${nodedir} -n -l- --pidfile=${pidfile}
               '';
               # The rlimit on number of open files controls how many
               # connections a particular storage server can accept (factoring
