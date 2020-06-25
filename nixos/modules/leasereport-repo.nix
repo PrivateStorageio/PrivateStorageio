@@ -4,6 +4,6 @@ in
   pkgs.fetchFromGitHub {
     owner = "PrivateStorageio";
     repo = "LeaseReport";
-    rev = "959d73fa9c0290d46d7eb9439c02df780909b03e";
-    sha256 = "0ksir726gsh67zlswmapw3iw0l7m052277vwbn689mg2galj8dfb";
+    rev = "92f6567160c1459b5992f1cb8535aee0c23bc093";
+    sha256 = "04k1q170n4dwvakgi9gsc8mbbhqzcnygiw51rqyrf9blrsdh5fma";
   }
