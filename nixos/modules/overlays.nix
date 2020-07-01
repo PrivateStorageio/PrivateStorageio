@@ -15,6 +15,8 @@ let
   };
 in
 self: super: {
+  leasereport = self.callPackage ./leasereport.nix { };
+
   # Use self.python27 to get the fixed point of all packages (that is, to
   # respect all of the overrides).  This is important since we want the
   # overridden Twisted as a dependency of this env, not the original one.

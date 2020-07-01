@@ -139,5 +139,10 @@ in
     [ "d ${incidents-dir} 0755 root root ${max-incident-age} -"
     ];
 
+    environment.systemPackages = [
+      # Provide a useful tool for reporting about shares.
+      pspkgs.leasereport
+    ];
+
   };
 }
