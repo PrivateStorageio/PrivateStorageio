@@ -1,7 +1,7 @@
 { "publicStoragePort": 8898
 , "ristrettoSigningKeyPath": "../../PrivateStorageSecrets/ristretto.signing-key"
 , "stripeSecretKeyPath": "../../PrivateStorageSecrets/privatestorageio-testing-stripe.secret"
-, "pass-value": 1000000
+, "passValue": 1000000
 , "issuerDomain": "payments.privatestorage-staging.com"
 , "letsEncryptAdminEmail": "jean-paul@privatestorage.io"
 , "allowedChargeOrigins": [
