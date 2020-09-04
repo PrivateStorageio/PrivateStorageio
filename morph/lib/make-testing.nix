@@ -1,4 +1,4 @@
-{ publicIPv4, hardware, publicStoragePort, ristrettoSigningKeyPath, sshUsers, stateVersion, ... }: rec {
+{ publicIPv4, hardware, publicStoragePort, ristrettoSigningKeyPath, passValue, sshUsers, stateVersion, ... }: rec {
 
   deployment = {
     secrets = {
@@ -26,6 +26,7 @@
     inherit publicIPv4;
     inherit publicStoragePort;
     ristrettoSigningKeyPath = deployment.secrets.ristretto-signing-key.destination;
+    inherit passValue;
     inherit sshUsers;
   };
 

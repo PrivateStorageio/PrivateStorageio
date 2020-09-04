@@ -3,6 +3,7 @@
 , hardware                   # The path to the hardware configuration for this node.
 , publicStoragePort          # The storage port number on which to accept connections.
 , ristrettoSigningKeyPath    # The *local* path to the Ristretto signing key file.
+, passValue                  # Bytes component of size×time value of passes.
 , sshUsers                   # Users for which to configure SSH access to this node.
 , stateVersion               # The value for system.stateVersion on this node.
                              # This value determines the NixOS release with
@@ -57,6 +58,8 @@
     inherit publicStoragePort;
     # Give it the Ristretto signing key, too, to support authorization.
     ristrettoSigningKeyPath = deployment.secrets.ristretto-signing-key.destination;
+    # Assign the configured pass value.
+    inherit passValue;
     # It gets the users, too.
     inherit sshUsers;
   };
