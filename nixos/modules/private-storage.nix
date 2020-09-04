@@ -78,6 +78,15 @@ in
         The path to the Ristretto signing key for the service.
       '';
     };
+    services.private-storage.passValue = lib.mkOption
+    { default = null;
+      type = lib.types.nullOr lib.types.int;
+      example = lib.literalExample (1000 * 1000);
+      description = ''
+        The bytes component of the bytes×time value of a single pass which
+        storage servers will use when making pricing decisions.
+      '';
+    };
   };
 
   # Define configuration based on values given for our options - starting with
@@ -126,7 +135,11 @@ in
         "storageserver.plugins.privatestorageio-zkapauthz-v1" =
         { "ristretto-issuer-root-url" = cfg.issuerRootURL;
           "ristretto-signing-key-path" = cfg.ristrettoSigningKeyPath;
-        };
+        } // (
+          if cfg.passValue == null
+          then {}
+          else { "pass-value" = (toString cfg.passValue); }
+        );
       };
     };
 
