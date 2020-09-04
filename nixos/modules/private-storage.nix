@@ -93,7 +93,7 @@ in
   # the option that says whether this is even turned on.
   config = lib.mkIf cfg.enable
   { services.tahoe.nodes."${storage-node-name}" =
-    { package = config.services.private-storage.tahoe.package;
+    { package = cfg.tahoe.package;
       # Each attribute in this set corresponds to a section in the tahoe.cfg
       # file.  Attributes on those sets correspond to individual assignments
       # in those sections.
