@@ -1,7 +1,7 @@
 let
-  # Define a Python packageOverride that puts our version of Twisted into
-  # python27Packages.
-  pythonTwistedOverride = python-self: python-super: {
+  # Define a Python packageOverride that puts our version of some Python
+  # packages into python27Packages.
+  pythonPackageOverride = python-self: python-super: {
     # Get our Twisted derivation.  Pass in the old one so it can have pieces
     # overridden.  It needs to be passed in explicitly because callPackage is
     # specially crafted to always pull attributes from the fixed-point.  That
@@ -12,6 +12,10 @@ let
     twisted = python-self.callPackage ../pkgs/twisted.nix {
       inherit (python-super) twisted;
     };
+
+    tahoe-lafs = python-self.callPackage ../pkgs/tahoe-lafs.nix { };
+
+    zkapauthorizer = python-self.callPackage ../pkgs/zkapauthorizer.nix { };
   };
 in
 self: super: {
@@ -38,8 +42,8 @@ self: super: {
   python27 = super.python27.override (old: {
     packageOverrides =
       if old ? packageOverrides then
-        super.lib.composeExtensions old.packageOverrides pythonTwistedOverride
+        super.lib.composeExtensions old.packageOverrides pythonPackageOverride
       else
-        pythonTwistedOverride;
+        pythonPackageOverride;
   });
 }
