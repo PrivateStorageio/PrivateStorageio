@@ -1,9 +1,4 @@
-# Derive a brand new version of pkgs which has our overlays applied.  This
-# includes our definition of the `privatestorage` derivation, a Python
-# environment with Tahoe-LAFS and ZKAPAuthorizer installed.
+# Derive a brand new version of pkgs which has our overlays applied.  This is
+# where the `privatestorage` derivation is added to nixpkgs.
 { pkgs }:
-import pkgs.path {
-  overlays = [
-    (import ./overlays.nix)
-  ];
-}
+pkgs.extend (import ./overlays.nix)
