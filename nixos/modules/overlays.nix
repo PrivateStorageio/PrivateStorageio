@@ -13,9 +13,14 @@ let
       inherit (python-super) twisted;
     };
 
+    # Put in our preferred version of tahoe-lafs as well.
     tahoe-lafs = python-self.callPackage ../pkgs/tahoe-lafs.nix { };
 
-    zkapauthorizer = python-self.callPackage ../pkgs/zkapauthorizer.nix { };
+    # This is handy too...
+    zkapauthorizer = python-self.callPackage ../pkgs/zkapauthorizer.nix {
+      # And explicitly configure it with our preferred version of Tahoe-LAFS.
+      inherit tahoe-lafs;
+    };
   };
 in
 self: super: {
@@ -30,7 +35,9 @@ self: super: {
   # instead because it implies a whole mess of derivations (all of the Python
   # modules available).
   privatestorage = self.python27.buildEnv.override
-  { extraLibs =
+  { # ... for dropin.cache
+    ignoreCollisions = true;
+    extraLibs =
     [ self.python27Packages.tahoe-lafs
       self.python27Packages.zkapauthorizer
     ];
