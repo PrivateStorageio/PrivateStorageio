@@ -12,7 +12,7 @@ from subprocess import check_output
 from configparser import ConfigParser
 
 def main():
-    (introducerFURL, issuerURL) = argv[1:]
+    (nodePath, introducerFURL, issuerURL) = argv[1:]
 
     run(["tahoe", "--version"])
     run([
@@ -21,7 +21,7 @@ def main():
         "--shares-happy", "1",
         "--shares-total", "1",
         "--introducer", introducerFURL,
-        "/tmp/client",
+        nodePath,
     ])
 
     # Add necessary ZKAPAuthorizer configuration bits.

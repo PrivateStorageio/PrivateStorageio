@@ -230,7 +230,7 @@ in {
       #
       # Storage appears to be working so try to get a client to speak with it.
       #
-      ${runOnNode "client"  [ run-client introducerFURL issuerURL ]}
+      ${runOnNode "client" [ run-client "/tmp/client" introducerFURL issuerURL ]}
       $client->waitForOpenPort(3456);
 
       # Make sure the fake Stripe API server is ready for requests.
@@ -245,7 +245,13 @@ in {
 
       # Get some ZKAPs from the issuer.
       eval {
-        ${runOnNode "client" [ get-passes "http://127.0.0.1:3456" issuerURL voucher ]}
+        ${runOnNode "client" [
+          get-passes
+          "http://127.0.0.1:3456"
+          "/tmp/client/private/api_auth_token"
+          issuerURL
+          voucher
+        ]}
       } or do {
         my ($code, $log) = $client->execute('cat /tmp/stdout /tmp/stderr');
         $client->log($log);
