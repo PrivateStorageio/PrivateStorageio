@@ -1,7 +1,7 @@
 let
-  # Define a Python packageOverride that puts our version of Twisted into
-  # python27Packages.
-  pythonTwistedOverride = python-self: python-super: {
+  # Define a Python packageOverride that puts our version of some Python
+  # packages into python27Packages.
+  pythonPackageOverride = python-self: python-super: rec {
     # Get our Twisted derivation.  Pass in the old one so it can have pieces
     # overridden.  It needs to be passed in explicitly because callPackage is
     # specially crafted to always pull attributes from the fixed-point.  That
@@ -11,6 +11,15 @@ let
     # and that never converges if it is the fixed point Twisted).
     twisted = python-self.callPackage ../pkgs/twisted.nix {
       inherit (python-super) twisted;
+    };
+
+    # Put in our preferred version of tahoe-lafs as well.
+    tahoe-lafs = python-self.callPackage ../pkgs/tahoe-lafs.nix { };
+
+    # This is handy too...
+    zkapauthorizer = python-self.callPackage ../pkgs/zkapauthorizer.nix {
+      # And explicitly configure it with our preferred version of Tahoe-LAFS.
+      inherit tahoe-lafs;
     };
   };
 in
@@ -26,7 +35,9 @@ self: super: {
   # instead because it implies a whole mess of derivations (all of the Python
   # modules available).
   privatestorage = self.python27.buildEnv.override
-  { extraLibs =
+  { # ... for dropin.cache
+    ignoreCollisions = true;
+    extraLibs =
     [ self.python27Packages.tahoe-lafs
       self.python27Packages.zkapauthorizer
     ];
@@ -38,8 +49,8 @@ self: super: {
   python27 = super.python27.override (old: {
     packageOverrides =
       if old ? packageOverrides then
-        super.lib.composeExtensions old.packageOverrides pythonTwistedOverride
+        super.lib.composeExtensions old.packageOverrides pythonPackageOverride
       else
-        pythonTwistedOverride;
+        pythonPackageOverride;
   });
 }
