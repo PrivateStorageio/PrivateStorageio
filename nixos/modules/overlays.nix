@@ -1,7 +1,7 @@
 let
   # Define a Python packageOverride that puts our version of some Python
   # packages into python27Packages.
-  pythonPackageOverride = python-self: python-super: {
+  pythonPackageOverride = python-self: python-super: rec {
     # Get our Twisted derivation.  Pass in the old one so it can have pieces
     # overridden.  It needs to be passed in explicitly because callPackage is
     # specially crafted to always pull attributes from the fixed-point.  That
