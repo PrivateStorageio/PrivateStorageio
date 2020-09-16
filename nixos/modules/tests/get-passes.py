@@ -12,11 +12,11 @@ from json import dumps
 from time import sleep
 
 def main():
-    if len(argv) != 4:
+    if len(argv) != 5:
         raise SystemExit(
-            "usage: %s <client api root> <issuer api root> <voucher>",
+            "usage: %s <client api root> <client api token path> <issuer api root> <voucher>",
         )
-    clientAPIRoot, issuerAPIRoot, voucher = argv[1:]
+    clientAPIRoot, clientAPITokenPath, issuerAPIRoot, voucher = argv[1:]
     if not clientAPIRoot.endswith("/"):
         clientAPIRoot += "/"
     if not issuerAPIRoot.endswith("/"):
@@ -24,11 +24,16 @@ def main():
 
     zkapauthz = clientAPIRoot + "storage-plugins/privatestorageio-zkapauthz-v1"
 
+    with open(clientAPITokenPath) as p:
+        clientAPIToken = p.read().strip()
+
     # Submit a charge to the issuer (which is also the PaymentServer).
     charge_response = post(
         issuerAPIRoot + "v1/stripe/charge",
         dumps(charge_json(voucher)),
-        headers={"content-type": "application/json"},
+        headers={
+            "content-type": "application/json",
+        },
     )
     charge_response.raise_for_status()
 
@@ -36,6 +41,11 @@ def main():
     response = put(
         zkapauthz + "/voucher",
         dumps({"voucher": voucher}),
+        headers={
+            "content-type": "application/json",
+            "authorization": "tahoe-lafs " + clientAPIToken,
+        }
+
     )
     if response.status_code // 100 != 2:
         print("Unexpected response: {}".format(response.content))
@@ -43,7 +53,12 @@ def main():
 
     # Poll the vouchers list for a while to see it get redeemed.
     def find_redeemed_voucher():
-        response = get(zkapauthz + "/voucher/" + voucher)
+        response = get(
+            zkapauthz + "/voucher/" + voucher,
+            headers={
+                "authorization": "tahoe-lafs " + clientAPIToken,
+            },
+        )
         response.raise_for_status()
         actual = response.json()
         print("Actual response: {}".format(actual))
