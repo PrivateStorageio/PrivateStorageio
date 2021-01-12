@@ -13,6 +13,9 @@ Welcome to PrivateStorageio's documentation!
    README
    architecture-overview
    morph
+   user/README
+   ops/README
+   dev/README
 
 
 
