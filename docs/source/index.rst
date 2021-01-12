@@ -6,16 +6,14 @@
 Welcome to PrivateStorageio's documentation!
 ============================================
 
+Howdy!  We separated the documentation into parts addressing different audiences.  Please enjoy our docs for:
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   README
-   architecture-overview
-   morph
-   user/README
-   ops/README
-   dev/README
+   Users <user/README>
+   Administrators <ops/README>
+   Developers <dev/README>
 
 
 

@@ -1,4 +1,5 @@
 User documentation
 ==================
 
-This contains user documentation.
+This will contain the user documentation for this project.
+
