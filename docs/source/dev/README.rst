@@ -40,6 +40,7 @@ It is also possible go through the testing script interactively - useful for deb
 This will give you a result symlink in the current directory.
 Inside that is bin/nixos-test-driver which gives you a kind of REPL for interacting with the VMs.
 The kind of `Perl in this testScript <https://github.com/PrivateStorageio/PrivateStorageio/blob/78881a3/nixos/modules/tests/private-storage.nix#L180>`_ is what you can enter into this REPL.
+Consult the `official documentation on NixOS Tests <https://nixos.org/manual/nixos/stable/index.html#sec-nixos-tests>`_ for more info.
 
 Architecture overview
 ---------------------
