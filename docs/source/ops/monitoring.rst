@@ -65,13 +65,9 @@ USE method for resources ("resource-scoped", "internal view")
 
 Utilization, Saturation, Errors:
 
-* CPUs
-   * Saturation (Idea: max saturation value per machine, since our load is mostly single-core)
-* Memory
-   * Saturation
-* Network
-   * Saturation
-* Network
+* CPU saturation (Idea: max saturation value per machine, since our load is mostly single-core)
+* Memory saturation
+* Network saturation
 * Disks
    * Storage capacity
    * I/O saturation
