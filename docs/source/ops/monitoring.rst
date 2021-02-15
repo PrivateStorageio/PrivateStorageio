@@ -66,14 +66,15 @@ USE method for resources ("resource-scoped", "internal view")
 Utilization, Saturation, Errors:
 
 * CPUs
-   * Saturation (Per core? So we catch maxxed out single cores? Would that work?)
+   * Saturation (Idea: max saturation value per machine, since our load is mostly single-core)
 * Memory
-   * Capacity
+   * Saturation
+* Network
+   * Saturation
 * Network
 * Disks
-   * Capacity
-   * I/O
-* Interconnects (Really? Hard to measure & shouldn't be the problem most of the time...)
+   * Storage capacity
+   * I/O saturation
 
 * Software resources
    * File descriptors?
