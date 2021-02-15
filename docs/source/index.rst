@@ -17,7 +17,7 @@ Howdy!  We separated the documentation into parts addressing different audiences
 
 
 Naming
-======
+------
 
 The name of this ops software project is "PrivateStorageio".
 There is another ops project that deals with the surrounding/supporting infrastructure called "PrivateStorageOps".
@@ -25,7 +25,7 @@ The domain name used for the website and other network services associated with 
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
