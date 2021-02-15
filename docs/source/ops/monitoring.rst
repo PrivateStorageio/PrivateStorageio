@@ -77,10 +77,7 @@ Utilization, Saturation, Errors:
    * I/O saturation
 
 * Software resources
-   * File descriptors?
-   * Mutex locks?
-   * Process / thread capacity?
-   * Thread pools?
+   * File descriptors
 
 
 Logging
