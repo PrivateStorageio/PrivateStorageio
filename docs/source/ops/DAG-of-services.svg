@@ -1,0 +1,47 @@
+<svg version="1.1" baseProfile="full" width="213.5" height="294" viewbox="0 0 213.5 294" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events" style="font:bold  12pt Helvetica, Helvetica, sans-serif;;stroke-linejoin:round;stroke-linecap:round">
+  <title >DAG of services</title>
+  <desc >#title: DAG of services
+
+[&lt;actor&gt; start]-&gt;[1]
+[1]--&gt;[2]
+[1]--&gt;[3]
+[1]--&gt;[4]
+
+[4]--&gt;[5]
+[4]--&gt;[6]
+[4]--&gt;[7]</desc>
+  <rect x="0" y="0" height="294" width="213.5" style="stroke:none; fill:transparent;"></rect>
+  <path d="M58.5 68.5 L58.5 88.5 L58.5 108.5 L58.5 108.5 " style="stroke:#33322E;fill:none;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M53.2 95.2 L58.5 101.8 L63.8 95.2 L58.5 108.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M46 137.7 L26 159.5 L26 179.5 L26 179.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;stroke-width:3;"></path>
+  <path d="M20.7 166.2 L26 172.8 L31.3 166.2 L26 179.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M71 137.7 L91 159.5 L91 179.5 L91 179.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;stroke-width:3;"></path>
+  <path d="M85.7 166.2 L91 172.8 L96.3 166.2 L91 179.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M71 128.6 L156 159.5 L156 179.5 L156 179.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;stroke-width:3;"></path>
+  <path d="M150.7 166.2 L156 172.8 L161.3 166.2 L156 179.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M143.5 199.6 L58.5 230.5 L58.5 250.5 L58.5 250.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;stroke-width:3;"></path>
+  <path d="M53.2 237.2 L58.5 243.8 L63.8 237.2 L58.5 250.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M143.5 208.7 L123.5 230.5 L123.5 250.5 L123.5 250.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;stroke-width:3;"></path>
+  <path d="M118.2 237.2 L123.5 243.8 L128.8 237.2 L123.5 250.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M168.5 208.7 L188.5 230.5 L188.5 250.5 L188.5 250.5 " style="stroke:#33322E;fill:none;stroke-dasharray:6 6;stroke-width:3;"></path>
+  <path d="M183.2 237.2 L188.5 243.8 L193.8 237.2 L188.5 250.5 Z" style="stroke:#33322E;fill:#33322E;stroke-dasharray:none;stroke-width:3;"></path>
+  <circle r="4" cx="58.5" cy="25.5" data-name="start" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></circle>
+  <path d="M58.5 29.5 L58.5 37.5" data-name="start" style="stroke:#33322E;fill:none;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M54.5 33.5 L62.5 33.5" data-name="start" style="stroke:#33322E;fill:none;stroke-dasharray:none;stroke-width:3;"></path>
+  <path d="M54.5 41.5 L58.5 37.5 L62.5 41.5" data-name="start" style="stroke:#33322E;fill:none;stroke-dasharray:none;stroke-width:3;"></path>
+  <text x="59" y="59" style="fill: #33322E;font:normal  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="start">start</text>
+  <rect x="46.5" y="108.5" height="31" width="25" data-name="1" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></rect>
+  <text x="59" y="130" style="fill: #33322E;font:bold  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="1">1</text>
+  <rect x="13.5" y="179.5" height="31" width="25" data-name="2" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></rect>
+  <text x="26" y="201" style="fill: #33322E;font:bold  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="2">2</text>
+  <rect x="78.5" y="179.5" height="31" width="25" data-name="3" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></rect>
+  <text x="91" y="201" style="fill: #33322E;font:bold  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="3">3</text>
+  <rect x="143.5" y="179.5" height="31" width="25" data-name="4" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></rect>
+  <text x="156" y="201" style="fill: #33322E;font:bold  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="4">4</text>
+  <rect x="46.5" y="250.5" height="31" width="25" data-name="5" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></rect>
+  <text x="59" y="272" style="fill: #33322E;font:bold  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="5">5</text>
+  <rect x="111.5" y="250.5" height="31" width="25" data-name="6" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></rect>
+  <text x="124" y="272" style="fill: #33322E;font:bold  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="6">6</text>
+  <rect x="176.5" y="250.5" height="31" width="25" data-name="7" style="stroke:#33322E;fill:#eee8d5;stroke-dasharray:none;stroke-width:3;"></rect>
+  <text x="189" y="272" style="fill: #33322E;font:bold  12pt Helvetica, Helvetica, sans-serif;text-anchor: middle;" data-name="7">7</text>
+</svg>
