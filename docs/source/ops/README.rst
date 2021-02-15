@@ -1,7 +1,7 @@
 Administrator documentation
 ###########################
 
-This contains documentation regarding running PrivateStorageIo.
+This contains documentation regarding running PrivateStorageio.
 
 .. include::
       ../../../morph/README.rst

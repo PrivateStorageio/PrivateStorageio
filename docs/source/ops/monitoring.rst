@@ -1,7 +1,7 @@
 Monitoring
 ==========
 
-This section gives a high-level overview of the PrivateStorageIO monitoring efforts.
+This section gives a high-level overview of the PrivateStorageio monitoring efforts.
 
 
 Goals
