@@ -23,15 +23,6 @@ Introduction to our dashboards
 We have two groups of dashboards: Requests (external view, RED method) and Resources (internal view, USE method).
 
 Services and their dependencies can be visualized as a tree from external-facing to internal systems.
-
-.. figure:: DAG-of-services.svg
-    :width: 200px
-    :align: center
-    :alt: DAG of services, created using https://www.nomnoml.com/
-    :figclass: align-center
-
-    DAG of services
-
 We order our dashboards like a breadth-first-search of that tree.
 This makes it easier to understand dependencies and faster to trouble shoot when a high-latency problem on a low-level service bubbles up.
 
