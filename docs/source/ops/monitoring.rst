@@ -22,9 +22,23 @@ Introduction to our dashboards
 
 We have two groups of dashboards: Requests (external view, RED method) and Resources (internal view, USE method).
 
-Services and their dependencies can be visualized as a tree from external-facing to internal systems.
-We order our dashboards like a breadth-first-search of that tree.
-This makes it easier to understand dependencies and faster to trouble shoot when a high-latency problem on a low-level service bubbles up.
+Resources like CPU and memory exist independently of one another (at least in theory) and their corresponding dashboards are listed in arbitrary order.
+
+Services, on the other hand, often directly depend on other services:
+A request might cause sub-requests, which in turn might call other services.
+These dependencies can be visualized as a DAG (directed acyclic graph, like a tree but with directed edges) from external-facing to internal systems.
+
+When a service fails, and an Alert is triggered, often the services which depend on the failing service will fail and trigger Alerts as well.
+This can cause confusion and cost valuable time especially when the current on-call staff is not familiar with the inner workings of a particular machinery.
+
+To mitigate this problem, we order our dashboards to resemble these dependencies according to a `breadth-first-search <https://en.wikipedia.org/wiki/Breadth-first_search>`_ of the service dependency DAG:
+
+.. graphviz:: service-dag-to-dashboard-order.dot
+   :caption: DAG of services to resulting order of corresponding dashboards
+
+This makes finding the first failing link, and thus the cause of the problem, quicker:
+Problems of a failing service lowest in the DAG bubble "upwards".
+Therefore, the "lowest" dashboard that indicates a problem has a high probability of highlighting the origin of the cascading failures.
 
 
 Meaning of our metrics
