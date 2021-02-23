@@ -1,0 +1,29 @@
+digraph {
+	subgraph cluster01 {
+		label = "DAG of service dependencies";
+
+		1->2;
+		1->3;
+
+		3->4;
+		3->5;
+	}
+
+	subgraph cluster02 {
+		label = "Resulting order of dashboards";
+		node [ shape = box ];
+		edge [ style = invis ];
+
+		d1 [ label = 1 ];
+		d2 [ label = 2 ];
+		d3 [ label = 3 ];
+		d4 [ label = 4 ];
+		d5 [ label = 5 ];
+
+		d1->d2;
+		d2->d3;
+		d3->d4;
+		d4->d5;
+	}
+}
+
