@@ -82,6 +82,12 @@ html_theme = 'alabaster'
 # documentation.
 #
 # html_theme_options = {}
+html_theme_options = {
+    'logo': 'logo-ps.svg',
+    'description': "&nbsp;", # ugly hack to get some white space below the logo
+    'fixed_sidebar': True,
+    'extra_nav_links': {"Fork me on GitHub": "https://github.com/PrivateStorageio/PrivateStorageio"},
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
