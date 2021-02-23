@@ -84,9 +84,9 @@ html_theme = 'alabaster'
 # html_theme_options = {}
 html_theme_options = {
     'logo': 'logo-ps.svg',
-    'github_user': 'PrivateStorageio',
-    'github_repo': 'PrivateStorageio',
+    'description': "&nbsp;", # ugly hack to get some white space below the logo
     'fixed_sidebar': True,
+    'extra_nav_links': {"Fork me on GitHub": "https://github.com/PrivateStorageio/PrivateStorageio"},
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
