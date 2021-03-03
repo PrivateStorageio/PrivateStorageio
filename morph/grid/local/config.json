@@ -2,8 +2,8 @@
 , "ristrettoSigningKeyPath": "../../PrivateStorageSecrets/ristretto.signing-key"
 , "stripeSecretKeyPath": "../../PrivateStorageSecrets/privatestorageio-testing-stripe.secret"
 , "passValue": 1000000
-, "issuerDomain": "payments.privatestorage-staging.com"
-, "letsEncryptAdminEmail": "jean-paul@privatestorage.io"
+, "issuerDomain": "payments.localdev"
+, "letsEncryptAdminEmail": "florian@privatestorage.io"
 , "allowedChargeOrigins": [
     "http://localhost:5000"
   , "https://privatestorage-staging.com"

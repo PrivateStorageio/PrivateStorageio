@@ -2,20 +2,21 @@
 # grid.  It will make the morph configuration for us.  We share this function
 # with the production grid and have one fewer possible point of divergence.
 import ../../lib/make-grid.nix {
-  name = "Testing";
+  name = "LocalDev";
   config = ./config.json;
   nodes = cfg:
   let
-    sshUsers = import ../../../../PrivateStorageSecrets/staging-users.nix;
+    sshUsers = import ../../../../PrivateStorageSecrets/localdev-users.nix;
   in {
-    "payments.privatestorage-staging.com" = import ../../lib/issuer.nix ({
+    "payments.localdev" = import ../../lib/issuer.nix ({
+      publicIPv4 = "10.233.2.2";
       inherit sshUsers;
       hardware = ../../lib/issuer-aws.nix;
       stateVersion = "19.03";
     } // cfg);
 
-    "3.120.26.190" = import ../../lib/make-testing.nix (cfg // {
-      publicIPv4 = "3.120.26.190";
+    "storage.localdev" = import ../../lib/make-testing.nix (cfg // {
+      publicIPv4 = "10.233.3.2";
       inherit sshUsers;
       hardware = ./testing001-hardware.nix;
       stateVersion = "19.03";
