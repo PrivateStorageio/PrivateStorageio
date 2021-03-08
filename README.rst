@@ -1,3 +1,8 @@
+Project Hosting Moved
+=====================
+
+This project can now be found at https://whetstone.privatestorage.io/opensource/PrivateStorageio
+
 PrivateStorageio
 ================
 
