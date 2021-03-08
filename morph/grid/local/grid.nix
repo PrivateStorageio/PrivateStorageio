@@ -8,17 +8,17 @@ import ../../lib/make-grid.nix {
   let
     sshUsers = import ../../../../PrivateStorageSecrets/localdev-users.nix;
   in {
-    "payments.localdev" = import ../../lib/issuer.nix ({
-      publicIPv4 = "10.233.2.2";
+    "payments-1" = import ../../lib/issuer.nix ({
+      publicIPv4 = "10.233.4.2";
       inherit sshUsers;
       hardware = ../../lib/issuer-aws.nix;
       stateVersion = "19.03";
     } // cfg);
 
-    "storage.localdev" = import ../../lib/make-testing.nix (cfg // {
-      publicIPv4 = "10.233.3.2";
+    "storage-1" = import ../../lib/make-testing.nix (cfg // {
+      publicIPv4 = "10.233.5.2";
       inherit sshUsers;
-      hardware = ./testing001-hardware.nix;
+      hardware = ./localdev001-hardware.nix;
       stateVersion = "19.03";
     });
   };
